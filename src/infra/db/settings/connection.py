@@ -24,11 +24,11 @@ class DBConection:
 
     # Criar fábrica de sessões assíncronas
     def __create_session(self):
-        return sessionmaker(self.engine, class_=AsyncSession, expire_on_commit=False)
+        return sessionmaker(self.__engine, class_=AsyncSession, expire_on_commit=False)
 
     # Dependência para obter uma sessão assíncrona
     async def get_session(self) -> AsyncGenerator[AsyncSession, None]:
-        async with self.async_session_maker() as session:
+        async with self.__async_session_maker() as session:
             yield session
     
     @property
