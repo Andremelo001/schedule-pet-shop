@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from .infra.db.database import init_db
+from src.infra.db.database import init_db
+from src.infra.routes import client_routes
 
-# Configurações de inicialização
+# Configurações de inicialização do banco 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
@@ -13,3 +14,4 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 # Rotas para Endpoints
+app.include_router(client_routes.router)

@@ -1,6 +1,6 @@
 from sqlmodel import SQLModel
 from sqlalchemy.ext.asyncio import AsyncEngine
-from .settings.connection import DBConection
+from src.infra.db.settings.connection import DBConection
 
 db = DBConection()
 
@@ -9,5 +9,5 @@ async def create_db_and_tables(engine: AsyncEngine):
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
 
-def init_db():
+async def init_db():
     return create_db_and_tables(db.engine)
