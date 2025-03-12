@@ -1,24 +1,27 @@
+from uuid import uuid4
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
-from uuid import uuid4
-from src.infra.db.entities.client import Client
-from src.infra.dtos.client_dto import CreateClient
+from src.infra.db.entities.client import Client as ClientEntitie
+from src.data.interfaces.interface_client_repository import InterfaceClientRepository
+from src.domain.models.client import Client
+from src.dto.client_dto import ClientDTO
 
 
-class ClientRepository:
+class ClientRepository(InterfaceClientRepository):
     @classmethod
-    async def client_exists(cls, session: AsyncSession, cpf_client: str) -> Client:
+    async def get_client(cls, session: AsyncSession, cpf_client: str) -> Client:
+        """Buscando um cliente pelo seu CPF"""
 
-        client = await session.execute(select(Client).where(Client.cpf == cpf_client))
+        client = await session.execute(select(ClientEntitie).where(ClientEntitie.cpf == cpf_client))
 
         return client.scalar_one_or_none()
 
     @classmethod
-    async def create_client(cls, session: AsyncSession, client: CreateClient) -> Client:
+    async def create_client(cls, session: AsyncSession, client: ClientDTO) -> None:
         """Criação de um novo cliente no banco"""
         
         try:
-            new_client = Client(
+            new_client = ClientEntitie(
                 id= uuid4(),
                 name= client.name,
                 cpf= client.cpf,
@@ -31,8 +34,6 @@ class ClientRepository:
             session.add(new_client)
             await session.commit()
             await session.refresh(new_client)
-
-            return new_client
         
         except Exception as exception:
             await session.rollback()
