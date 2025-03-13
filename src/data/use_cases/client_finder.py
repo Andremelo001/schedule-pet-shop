@@ -12,12 +12,12 @@ class ClientFinder(InterfaceClientFinder):
 
     async def find(self, session: AsyncSession, cpf_client: str) -> Client:
 
-        self.__validate_cpf(cpf_client)
+        cpf_client = self.validate_cpf(cpf_client)
 
         return await self.__find_client(session, cpf_client)
     
     @classmethod
-    def __validate_cpf(cls, cpf: str) -> None:
+    def validate_cpf(cls, cpf: str) -> str:
         # Remove caracteres não numéricos
         cpf = re.sub(r'\D', '', cpf)
         
@@ -37,6 +37,8 @@ class ClientFinder(InterfaceClientFinder):
         
         if cpf[-2:] != f"{digito1}{digito2}":
             raise Exception("Cpf informado é inválido")
+        
+        return cpf
         
     async def __find_client(self, session: AsyncSession, cpf_client: str) -> Client:
         client = await self.__client_repository.get_client(session, cpf_client)
