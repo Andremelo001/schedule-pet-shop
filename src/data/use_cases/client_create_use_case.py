@@ -5,10 +5,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.domain.use_cases.interface_client_create import InterfaceClientCreate
 from src.data.interfaces.interface_client_repository import InterfaceClientRepository
 from src.dto.client_dto import ClientDTO
-from src.data.use_cases.client_finder import ClientFinder
+from src.data.use_cases.client_finder_use_case import ClientFinderUseCase
 
 
-class CreateClient(InterfaceClientCreate):
+class CreateClientUseCase(InterfaceClientCreate):
     def __init__(self, client_repository: InterfaceClientRepository):
         self.__client_repository = client_repository
 
@@ -31,12 +31,15 @@ class CreateClient(InterfaceClientCreate):
         if not re.match(email_padrao, email):
             raise Exception("O e-mail informado não é válido! Exemplo: ex@gmail.com")
         
-
     @classmethod
     def __validate_senha(cls, senha: str) -> None:
         if not bool(re.match(r'^(?=.*[A-Z])(?=.*\d).{8,}$', senha)):
             raise Exception("A senha deve conter pelo menos uma letra maiúscula, um número e ter no mínimo 8 caracteres")
         
+    @classmethod
+    def __format_cpf(cls, cpf_client) -> str:
+
+        return ClientFinderUseCase.validate_cpf(cpf_client)
 
     async def __client_exists(self, session: AsyncSession, cpf: str) -> None:
         client_exists = await self.__client_repository.get_client(session, cpf)
@@ -49,10 +52,7 @@ class CreateClient(InterfaceClientCreate):
 
         return {"message": "Cliente cadastrado com sucesso"}
     
-    @classmethod
-    def __format_cpf(cls, cpf_client) -> str:
 
-        return ClientFinder.validate_cpf(cpf_client)
 
         
 

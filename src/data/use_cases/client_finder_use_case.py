@@ -6,7 +6,7 @@ from src.domain.use_cases.interface_client_finder import InterfaceClientFinder
 from src.data.interfaces.interface_client_repository import InterfaceClientRepository
 from src.domain.models.client import Client
 
-class ClientFinder(InterfaceClientFinder):
+class ClientFinderUseCase(InterfaceClientFinder):
     def __init__(self, client_repository: InterfaceClientRepository) -> None:
         self.__client_repository = client_repository
 
