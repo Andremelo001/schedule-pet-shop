@@ -1,6 +1,6 @@
 import re
-from typing import Dict
 from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Dict
 
 from src.domain.use_cases.interface_client_finder import InterfaceClientFinder
 from src.data.interfaces.interface_client_repository import InterfaceClientRepository
@@ -10,11 +10,13 @@ class ClientFinderUseCase(InterfaceClientFinder):
     def __init__(self, client_repository: InterfaceClientRepository) -> None:
         self.__client_repository = client_repository
 
-    async def find(self, session: AsyncSession, cpf_client: str) -> Client:
+    async def find(self, session: AsyncSession, cpf_client: str) -> Dict:
 
         cpf_client = self.validate_cpf(cpf_client)
 
-        return await self.__find_client(session, cpf_client)
+        client = await self.__find_client(session, cpf_client)
+
+        return self.__format_response(client)
     
     @classmethod
     def validate_cpf(cls, cpf: str) -> str:
@@ -39,6 +41,24 @@ class ClientFinderUseCase(InterfaceClientFinder):
             raise Exception("Cpf informado é inválido")
         
         return cpf
+    
+    @classmethod
+    def __format_response(cls, client: Client) -> Dict:
+        
+        response = []
+
+        response.append(
+            {
+                "id": str(client.id),
+                "name": client.name,
+                "age": client.age,
+                "email": client.email,
+                "senha": client.senha,
+                "is_admin": client.is_admin  
+            }
+        )
+
+        return response
         
     async def __find_client(self, session: AsyncSession, cpf_client: str) -> Client:
         client = await self.__client_repository.get_client(session, cpf_client)
@@ -47,5 +67,3 @@ class ClientFinderUseCase(InterfaceClientFinder):
             raise Exception(f"Nenhum cliente encontrado com o cpf {cpf_client}")
         
         return client
-
-

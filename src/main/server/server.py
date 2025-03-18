@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from src.infra.db.database import init_db
-from src.infra.routes import client_routes
+from src.main.routes import client_routes
 
 # Configurações de inicialização do banco 
 @asynccontextmanager
