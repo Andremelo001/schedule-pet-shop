@@ -6,12 +6,12 @@ from src.presentation.http_types.http_response import HttpResponse
 
 class ClientFinderController(ControllerInterface):
     def __init__(self, use_case: InterfaceClientFinder):
-        self.__use_case = use_case
+        self.use_case = use_case
 
     async def handle(self, session: AsyncSession, http_request: HttpRequest) -> HttpResponse:
          cpf_client = http_request.query_params["cpf_client"]
 
-         response = await self.__use_case.find(session, cpf_client)
+         response = await self.use_case.find(session, cpf_client)
 
          return HttpResponse(
              status_code=200,

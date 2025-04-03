@@ -7,7 +7,7 @@ from src.dto.client_dto import ClientDTO
 
 class ClientCreateController(ControllerInterface):
     def __init__(self, use_case: InterfaceClientCreate):
-        self.__use_case = use_case
+        self.use_case = use_case
         
     async def handle(self, session: AsyncSession, http_request: HttpRequest) -> HttpResponse:
 
@@ -25,7 +25,7 @@ class ClientCreateController(ControllerInterface):
             senha=senha
         )
 
-        response = await self.__use_case.create(session, client)
+        response = await self.use_case.create(session, client)
 
         return HttpResponse(
             status_code=200,

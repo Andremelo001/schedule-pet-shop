@@ -14,34 +14,34 @@ class CreateClientUseCase(InterfaceClientCreate):
 
     async def create(self, session: AsyncSession, client: ClientDTO) -> Dict:
 
-        await self.__client_exists(session, client.cpf)
+        await self.client_exists(session, client.cpf)
         
-        self.__validate_email(client.email)
+        self.validate_email(client.email)
 
-        self.__validate_senha(client.senha)
+        self.validate_senha(client.senha)
 
-        client.cpf = self.__format_cpf(client.cpf)
+        client.cpf = self.format_cpf(client.cpf)
 
         return await self.__register_client_informations(session, client)
 
     @classmethod
-    def __validate_email(cls, email: str) -> None:
+    def validate_email(cls, email: str) -> None:
         email_padrao = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
 
         if not re.match(email_padrao, email):
             raise Exception("O e-mail informado não é válido! Exemplo: ex@gmail.com")
         
     @classmethod
-    def __validate_senha(cls, senha: str) -> None:
+    def validate_senha(cls, senha: str) -> None:
         if not bool(re.match(r'^(?=.*[A-Z])(?=.*\d).{8,}$', senha)):
             raise Exception("A senha deve conter pelo menos uma letra maiúscula, um número e ter no mínimo 8 caracteres")
         
     @classmethod
-    def __format_cpf(cls, cpf_client) -> str:
+    def format_cpf(cls, cpf_client) -> str:
 
         return ClientFinderUseCase.validate_cpf(cpf_client)
 
-    async def __client_exists(self, session: AsyncSession, cpf: str) -> None:
+    async def client_exists(self, session: AsyncSession, cpf: str) -> None:
         client_exists = await self.__client_repository.get_client(session, cpf)
 
         if client_exists:
@@ -51,17 +51,3 @@ class CreateClientUseCase(InterfaceClientCreate):
         await self.__client_repository.create_client(session, client)
 
         return {"message": "Cliente cadastrado com sucesso"}
-    
-
-
-        
-
-
-
-
-
-
-
-
-        
-        
