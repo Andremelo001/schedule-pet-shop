@@ -14,6 +14,9 @@ from src.main.composers.client_finder_composer import client_finder_composer
 from src.main.composers.client_update_composer import client_update_composer
 from src.main.composers.client_delete_composer import client_delete_composer
 
+#Import Error Handler
+from src.errors.error_handler import handle_errors
+
 
 db = DBConection()
 
@@ -25,7 +28,12 @@ router = APIRouter(
 @router.post("/create", response_model=Dict)
 async def create_client(request: Request, session: AsyncSession = Depends(db.get_session)):
 
-    http_response = await request_adapter(request, session, client_create_composer)
+    http_response = None
+
+    try:
+        http_response = await request_adapter(request, session, client_create_composer)
+    except Exception as exception:
+        http_response = handle_errors(exception)
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
@@ -33,21 +41,36 @@ async def create_client(request: Request, session: AsyncSession = Depends(db.get
 @router.get("/find", response_model=Dict)
 async def get_client(request: Request, session: AsyncSession = Depends(db.get_session)):
 
-    http_response = await request_adapter(request, session, client_finder_composer)
+    http_response = None
+
+    try:
+        http_response = await request_adapter(request, session, client_finder_composer)
+    except Exception as exception:
+        http_response = handle_errors(exception)
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
 @router.put("/update", response_model=Dict)
 async def update_client(request: Request, session: AsyncSession = Depends(db.get_session)):
 
-    http_response = await request_adapter(request, session, client_update_composer)
+    http_response = None
+
+    try:
+        http_response = await request_adapter(request, session, client_update_composer)
+    except Exception as exception:
+        http_response = handle_errors(exception)
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
 @router.delete("/delete", response_model=Dict)
 async def update_client(request: Request, session: AsyncSession = Depends(db.get_session)):
 
-    http_response = await request_adapter(request, session, client_delete_composer)
+    http_response = None
+
+    try:
+        http_response = await request_adapter(request, session, client_delete_composer)
+    except Exception as exception:
+        http_response = handle_errors(exception)
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 

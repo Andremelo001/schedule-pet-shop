@@ -3,10 +3,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
 from src.infra.db.entities.client import Client as ClientEntitie
-
 from src.data.interfaces.interface_client_repository import InterfaceClientRepository
 from src.domain.models.client import Client
 from src.dto.client_dto import ClientDTO, ClientUpdateDTO
+
+from src.errors.types_errors import HttpNotFoundError
 
 
 class ClientRepository(InterfaceClientRepository):
@@ -47,7 +48,7 @@ class ClientRepository(InterfaceClientRepository):
         new_client = result_client.scalar_one_or_none()
         
         if not new_client:
-            raise Exception(f"Cliente com o {id_client} não encontrado")
+            raise HttpNotFoundError(f"Cliente com o {id_client} não encontrado")
 
         for key, value in client.model_dump(exclude_unset=True).items():
             setattr(new_client, key, value)
@@ -65,7 +66,7 @@ class ClientRepository(InterfaceClientRepository):
         delete_client = client.scalar_one_or_none()
 
         if not delete_client:
-            raise Exception(f"Cliente com o id {id_client} não foi encontrado")
+            raise HttpNotFoundError(f"Cliente com o id {id_client} não foi encontrado")
   
         await sesion.delete(delete_client)
         await sesion.commit()

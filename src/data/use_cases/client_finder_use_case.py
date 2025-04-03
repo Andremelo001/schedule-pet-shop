@@ -6,6 +6,8 @@ from src.domain.use_cases.interface_client_finder import InterfaceClientFinder
 from src.data.interfaces.interface_client_repository import InterfaceClientRepository
 from src.domain.models.client import Client
 
+from src.errors.types_errors import HttpNotFoundError, HttpBadRequestError
+
 class ClientFinderUseCase(InterfaceClientFinder):
     def __init__(self, client_repository: InterfaceClientRepository) -> None:
         self.__client_repository = client_repository
@@ -24,10 +26,10 @@ class ClientFinderUseCase(InterfaceClientFinder):
         cpf = re.sub(r'\D', '', cpf)
         
         if len(cpf) != 11:
-            raise Exception("Cpf informado não apresenta 11 dígitos")
+            raise HttpBadRequestError("Cpf informado não apresenta 11 dígitos")
         
         if cpf == cpf[0] * 11:
-            raise Exception("Cpf informado apresenta todos os dígitos iguais")
+            raise HttpBadRequestError("Cpf informado apresenta todos os dígitos iguais")
         
         # Cálculo do primeiro dígito verificador
         soma = sum(int(cpf[i]) * (10 - i) for i in range(9))
@@ -38,7 +40,7 @@ class ClientFinderUseCase(InterfaceClientFinder):
         digito2 = (soma * 10 % 11) % 10
         
         if cpf[-2:] != f"{digito1}{digito2}":
-            raise Exception("Cpf informado é inválido")
+            raise HttpBadRequestError("Cpf informado é inválido")
         
         return cpf
     
@@ -64,6 +66,6 @@ class ClientFinderUseCase(InterfaceClientFinder):
         client = await self.__client_repository.get_client(session, cpf_client)
 
         if not client:
-            raise Exception(f"Nenhum cliente encontrado com o cpf {cpf_client}")
+            raise HttpNotFoundError(f"Nenhum cliente encontrado com o cpf {cpf_client}")
         
         return client

@@ -7,6 +7,8 @@ from src.data.interfaces.interface_client_repository import InterfaceClientRepos
 from src.dto.client_dto import ClientDTO
 from src.data.use_cases.client_finder_use_case import ClientFinderUseCase
 
+from src.errors.types_errors import HttpBadRequestError, HttpConflitError
+
 
 class CreateClientUseCase(InterfaceClientCreate):
     def __init__(self, client_repository: InterfaceClientRepository):
@@ -29,12 +31,12 @@ class CreateClientUseCase(InterfaceClientCreate):
         email_padrao = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
 
         if not re.match(email_padrao, email):
-            raise Exception("O e-mail informado não é válido! Exemplo: ex@gmail.com")
+            raise HttpBadRequestError("O e-mail informado não é válido! Exemplo: ex@gmail.com")
         
     @classmethod
     def validate_senha(cls, senha: str) -> None:
         if not bool(re.match(r'^(?=.*[A-Z])(?=.*\d).{8,}$', senha)):
-            raise Exception("A senha deve conter pelo menos uma letra maiúscula, um número e ter no mínimo 8 caracteres")
+            raise HttpBadRequestError("A senha deve conter pelo menos uma letra maiúscula, um número e ter no mínimo 8 caracteres")
         
     @classmethod
     def format_cpf(cls, cpf_client) -> str:
@@ -45,7 +47,7 @@ class CreateClientUseCase(InterfaceClientCreate):
         client_exists = await self.__client_repository.get_client(session, cpf)
 
         if client_exists:
-            raise Exception(f"Cliente com o cpf {cpf} já existe")
+            raise HttpConflitError(f"Cliente com o cpf {cpf} já existe")
         
     async def __register_client_informations(self, session: AsyncSession, client: ClientDTO) -> Dict:
         await self.__client_repository.create_client(session, client)

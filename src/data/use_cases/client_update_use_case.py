@@ -7,6 +7,8 @@ from src.data.use_cases.client_create_use_case import CreateClientUseCase
 from src.dto.client_dto import ClientUpdateDTO
 from src.domain.models.client import Client
 
+from src.errors.types_errors import HttpConflitError
+
 class ClientUpdateUseCase(InterfaceClientUpdate):
     def __init__(self, repository: InterfaceClientRepository):
         self.repository = repository
@@ -14,14 +16,11 @@ class ClientUpdateUseCase(InterfaceClientUpdate):
     async def update(self, session: AsyncSession, id_client: str, client: ClientUpdateDTO) -> Dict:
         await self.__client_exists(session, client.cpf, id_client)
 
-        if client.email is not None:
-            self.__validate_email(client.email)
+        self.__validate_email(client.email)
 
-        if client.senha is not None:
-            self.__validate_senha(client.senha)
+        self.__validate_senha(client.senha)
 
-        if client.cpf is not None:
-            client.cpf = self.__format_cpf(client.cpf)
+        client.cpf = self.__format_cpf(client.cpf)
 
         new_client = await self.repository.update_client(session, id_client, client)
     
@@ -32,19 +31,22 @@ class ClientUpdateUseCase(InterfaceClientUpdate):
         client = await self.repository.get_client(session, cpf)
 
         if client and str(client.id) != id_client:
-            raise Exception(f"Cliente com o cpf {cpf} já existe")
+            raise HttpConflitError(f"Cliente com o cpf {cpf} já existe")
 
     @classmethod
     def __validate_email(cls, email: str) -> None:
-        CreateClientUseCase.validate_email(email)
+        if email is not None:
+            CreateClientUseCase.validate_email(email)
 
     @classmethod
     def __validate_senha(cls, senha: str) -> None:
-        CreateClientUseCase.validate_senha(senha)
+        if senha is not None:
+            CreateClientUseCase.validate_senha(senha)
         
     @classmethod
     def __format_cpf(cls, cpf) -> str:
-        return CreateClientUseCase.format_cpf(cpf)
+        if cpf is not None:
+            return CreateClientUseCase.format_cpf(cpf)
 
     @classmethod
     def __format_response(cls, client: Client) -> Dict:

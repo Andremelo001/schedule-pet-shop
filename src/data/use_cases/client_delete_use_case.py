@@ -3,6 +3,8 @@ from typing import Dict
 from src.data.interfaces.interface_client_repository import InterfaceClientRepository
 from src.domain.use_cases.interface_client_delete import InterfaceClientDelete
 
+from src.errors.types_errors import HttpNotFoundError
+
 class ClientDeleteUseCase(InterfaceClientDelete):
     def __init__(self, repositoy: InterfaceClientRepository):
         self.repository = repositoy
