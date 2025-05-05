@@ -7,6 +7,9 @@ from src.dto.client_dto import ClientDTO, ClientUpdateDTO
 class InterfaceClientRepository(ABC):
 
     @abstractmethod
+    async def get_client_by_id(cls, session: AsyncSession, id_client: str) -> Client: pass
+
+    @abstractmethod
     async def get_client(self, session: AsyncSession, cpf_client: str) -> Client: pass
 
     @abstractmethod
