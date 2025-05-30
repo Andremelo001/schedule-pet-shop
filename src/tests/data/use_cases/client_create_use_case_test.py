@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import AsyncMock
-from src.data.use_cases.client_create_use_case import CreateClientUseCase
-from src.dto.client_dto import ClientDTO
+from src.modules.user.data.use_cases.client_create_use_case import CreateClientUseCase
+from src.modules.user.dto.client_dto import ClientDTO
 from src.errors.types_errors import HttpBadRequestError, HttpConflitError
 
 from src.infra.db.entities.client import Client

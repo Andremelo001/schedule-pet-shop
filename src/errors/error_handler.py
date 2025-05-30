@@ -1,8 +1,8 @@
-from src.errors.types_errors import HttpConflitError, HttpBadRequestError, HttpNotFoundError
+from src.errors.types_errors import HttpConflitError, HttpBadRequestError, HttpNotFoundError, HttpUnauthorized
 from src.presentation.http_types.http_response import HttpResponse
 
 def handle_errors(error: Exception) -> HttpResponse:
-    if isinstance(error, (HttpConflitError, HttpBadRequestError, HttpNotFoundError)):
+    if isinstance(error, (HttpConflitError, HttpBadRequestError, HttpNotFoundError, HttpUnauthorized)):
         return HttpResponse(
             status_code=error.status_code,
             body={

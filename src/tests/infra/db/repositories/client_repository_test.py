@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock
 from src.infra.db.entities.client import Client
 from src.infra.db.repositories.client_repository import ClientRepository
-from src.dto.client_dto import ClientDTO, ClientUpdateDTO
+from src.modules.user.dto.client_dto import ClientDTO, ClientUpdateDTO
 
 @pytest.mark.asyncio
 async def test_get_client(mocker):

@@ -3,9 +3,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
 from src.infra.db.entities.client import Client as ClientEntitie
-from src.data.interfaces.interface_client_repository import InterfaceClientRepository
-from src.domain.models.client import Client
-from src.dto.client_dto import ClientDTO, ClientUpdateDTO
+from src.modules.user.data.interfaces.interface_client_repository import InterfaceClientRepository
+from src.modules.user.domain.models.client import Client
+from src.modules.user.dto.client_dto import ClientDTO, ClientUpdateDTO
 
 from src.errors.types_errors import HttpNotFoundError
 
@@ -71,3 +71,9 @@ class ClientRepository(InterfaceClientRepository):
   
         await session.delete(delete_client)
         await session.commit()
+
+    async def get_client_by_email(self, session: AsyncSession, email: str) -> Client:
+
+        user = await session.execute(select(ClientEntitie).where(ClientEntitie.email == email))
+
+        return user.scalar_one_or_none()
