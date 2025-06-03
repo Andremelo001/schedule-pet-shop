@@ -18,6 +18,8 @@ from src.main.composers.authenticate_user_composers.generate_token_composer impo
 #Import Error Handler
 from src.errors.error_handler import handle_errors
 
+#Import Middlewares
+from src.middlewares.ensureAuthenticated import ensureAuthenticated
 
 db = DBConection()
 
@@ -52,7 +54,10 @@ async def get_client(request: Request, session: AsyncSession = Depends(db.get_se
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
 @router.put("/update", response_model=Dict)
-async def update_client(request: Request, session: AsyncSession = Depends(db.get_session)):
+async def update_client(
+    request: Request, session: AsyncSession = Depends(db.get_session), 
+    ensureAuthenticated = Depends(ensureAuthenticated)
+    ):
 
     http_response = None
 
@@ -76,7 +81,7 @@ async def delete_client(request: Request, session: AsyncSession = Depends(db.get
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
 @router.post("/login", response_model=Dict)
-async def update_client(request: Request, session: AsyncSession = Depends(db.get_session)):
+async def login_client(request: Request, session: AsyncSession = Depends(db.get_session)):
 
     http_response = None
 
