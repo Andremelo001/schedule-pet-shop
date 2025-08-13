@@ -36,7 +36,6 @@ class ClientRepository(InterfaceClientRepository):
                 age= client.age,
                 email= client.email,
                 senha= client.senha,
-                is_admin= False
             )
 
             session.add(new_client)

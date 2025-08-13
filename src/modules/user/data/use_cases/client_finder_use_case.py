@@ -55,8 +55,7 @@ class ClientFinderUseCase(InterfaceClientFinder):
                 "name": client.name,
                 "age": client.age,
                 "email": client.email,
-                "senha": client.senha,
-                "is_admin": client.is_admin  
+                "senha": client.senha
             }
         )
 

@@ -11,7 +11,6 @@ class ClientBase(SQLModel):
     age: int
     email: str
     senha: str
-    is_admin: bool = Field(default=False)
 
 
 class Client(ClientBase, table=True):

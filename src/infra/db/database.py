@@ -6,6 +6,7 @@ from src.infra.db.entities.client import Client
 from src.infra.db.entities.pet import Pet
 from src.infra.db.entities.schedule import Schedule
 from src.infra.db.entities.services import Services
+from src.infra.db.entities.admin import Admin
 
 db = DBConection()
 

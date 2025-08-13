@@ -13,6 +13,13 @@ API para gerenciamento de PetShop - Controle de clientes, pets, agendamentos e s
 ```mermaid
 classDiagram
     direction LR
+    class Admin {
+        id: uuid
+        name: str
+        senha: str
+        user: str
+    }
+
     class Client {
         id: uuid 
         name: str
@@ -20,8 +27,6 @@ classDiagram
         senha: str
         email: str
         age: int
-        is_admin: bool
-        active: bool
     }
 
     class Pet {

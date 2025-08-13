@@ -60,7 +60,6 @@ class ClientUpdateUseCase(InterfaceClientUpdate):
             'age': client.age,
             'email': client.email,
             'senha': client.senha,
-            'is_admin': client.is_admin
         })
 
         return response
