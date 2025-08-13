@@ -21,6 +21,7 @@ classDiagram
         email: str
         age: int
         is_admin: bool
+        active: bool
     }
 
     class Pet {

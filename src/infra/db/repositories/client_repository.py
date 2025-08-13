@@ -72,7 +72,8 @@ class ClientRepository(InterfaceClientRepository):
         await session.delete(delete_client)
         await session.commit()
 
-    async def get_client_by_email(self, session: AsyncSession, email: str) -> Client:
+    @classmethod
+    async def get_client_by_email(cls, session: AsyncSession, email: str) -> Client:
 
         user = await session.execute(select(ClientEntitie).where(ClientEntitie.email == email))
 

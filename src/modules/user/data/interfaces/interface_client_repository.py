@@ -10,19 +10,19 @@ class InterfaceClientRepository(ABC):
     async def get_client_by_id(cls, session: AsyncSession, id_client: str) -> Client: pass
 
     @abstractmethod
-    async def get_client(self, session: AsyncSession, cpf_client: str) -> Client: pass
+    async def get_client(cls, session: AsyncSession, cpf_client: str) -> Client: pass
 
     @abstractmethod
-    async def get_client_by_email(self, session: AsyncSession, email: str) -> Client: pass
+    async def get_client_by_email(cls, session: AsyncSession, email: str) -> Client: pass
 
     @abstractmethod
-    async def create_client(self, session: AsyncSession, client: ClientDTO) -> Client: pass
+    async def create_client(cls, session: AsyncSession, client: ClientDTO) -> Client: pass
 
     @abstractmethod
     async def update_client(self, session: AsyncSession, id_client: str, client: ClientUpdateDTO) -> Client: pass
 
     @abstractmethod
-    async def delete_client(cls, session: AsyncSession, id_client: str) -> None: pass
+    async def delete_client(self, session: AsyncSession, id_client: str) -> None: pass
 
         
 

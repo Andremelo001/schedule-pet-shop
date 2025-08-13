@@ -20,6 +20,7 @@ class GenerateTokenController(ControllerInterface):
         return HttpResponse(
             status_code=200,
             body= {
+                "message": "Cliente autenticado com sucesso",
                 "token": responde
             }
         )

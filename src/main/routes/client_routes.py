@@ -18,9 +18,6 @@ from src.main.composers.authenticate_user_composers.generate_token_composer impo
 #Import Error Handler
 from src.errors.error_handler import handle_errors
 
-#Import Middlewares
-from src.middlewares.ensureAuthenticated import ensureAuthenticated
-
 db = DBConection()
 
 router = APIRouter(
@@ -55,8 +52,7 @@ async def get_client(request: Request, session: AsyncSession = Depends(db.get_se
 
 @router.put("/update", response_model=Dict)
 async def update_client(
-    request: Request, session: AsyncSession = Depends(db.get_session), 
-    ensureAuthenticated = Depends(ensureAuthenticated)
+    request: Request, session: AsyncSession = Depends(db.get_session)
     ):
 
     http_response = None
