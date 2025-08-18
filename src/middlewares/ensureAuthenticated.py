@@ -1,4 +1,4 @@
-from fastapi import Request
+from fastapi import Request, Depends
 from src.errors.types_errors import HttpUnauthorized
 from src.drivers.jwt.jwt_service import JWTService
 
@@ -20,5 +20,19 @@ async def ensureAuthenticated(request: Request):
     
     except Exception:
         raise HttpUnauthorized("Invalid token")
+
+async def ensure_admin(payload: dict = Depends(ensureAuthenticated)):
+
+    if payload.get("role") != "admin":
+        raise HttpUnauthorized("Admins only")
+    
+    return payload
+
+async def ensure_client(payload: dict = Depends(ensureAuthenticated)):
+
+    if payload.get("role") != "client":
+        raise HttpUnauthorized("Clients only")
+    
+    return payload
 
 

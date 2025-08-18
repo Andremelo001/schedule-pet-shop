@@ -19,7 +19,3 @@ class JWTService:
     
     def validate_token(self, token: str) -> dict:
         return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-
-
-
-

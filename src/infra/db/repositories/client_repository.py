@@ -3,8 +3,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
 from src.infra.db.entities.client import Client as ClientEntitie
+from src.infra.db.entities.pet import Pet
+from src.infra.db.entities.schedule import Schedule
+
 from src.modules.user.data.interfaces.interface_client_repository import InterfaceClientRepository
 from src.modules.user.domain.models.client import Client
+
 from src.modules.user.dto.client_dto import ClientDTO, ClientUpdateDTO
 
 from src.errors.types_errors import HttpNotFoundError
@@ -63,12 +67,22 @@ class ClientRepository(InterfaceClientRepository):
     
     async def delete_client(self, session: AsyncSession, id_client: str) -> None:
 
-        delete_client = await self.get_client_by_id(session, id_client)
+        client = await self.get_client_by_id(session, id_client)
 
-        if not delete_client:
+        if not client:
             raise HttpNotFoundError(f"Cliente com o id {id_client} não foi encontrado")
-  
-        await session.delete(delete_client)
+
+        pets = (await session.execute(select(Pet).where(Pet.client_id == id_client))).scalars().all()
+
+        for pet in pets:
+            await session.delete(pet)
+
+        schedules = (await session.execute(select(Schedule).where(Schedule.client_id == id_client))).scalars().all()
+
+        for schedule in schedules:
+            await session.delete(schedule)
+
+        await session.delete(client)
         await session.commit()
 
     @classmethod

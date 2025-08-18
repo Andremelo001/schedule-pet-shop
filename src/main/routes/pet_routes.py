@@ -18,7 +18,7 @@ from src.main.composers.pet_composers.pet_update_composer import pet_update_comp
 from src.errors.error_handler import handle_errors
 
 #Import Middlewares
-from src.middlewares.ensureAuthenticated import ensureAuthenticated
+from src.middlewares.ensureAuthenticated import ensure_client
 
 db = DBConection()
 
@@ -28,7 +28,7 @@ router = APIRouter(
 )
 
 @router.post("/create", response_model=Dict)
-async def create_pet(request: Request, session: AsyncSession = Depends(db.get_session), ensureAuthenticated = Depends(ensureAuthenticated)):
+async def create_pet(request: Request, session: AsyncSession = Depends(db.get_session), ensureClient = Depends(ensure_client)):
 
     http_response = None
 
@@ -40,7 +40,7 @@ async def create_pet(request: Request, session: AsyncSession = Depends(db.get_se
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
 @router.get("/get_all_pets", response_model=List[Dict])
-async def list_pets(request: Request, session: AsyncSession = Depends(db.get_session), ensureAuthenticated = Depends(ensureAuthenticated)):
+async def list_pets(request: Request, session: AsyncSession = Depends(db.get_session), ensureClient = Depends(ensure_client)):
 
     http_response = None
 
@@ -52,7 +52,7 @@ async def list_pets(request: Request, session: AsyncSession = Depends(db.get_ses
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
 @router.get("/finder", response_model=Dict)
-async def finder_pet(request: Request, session: AsyncSession = Depends(db.get_session), ensureAuthenticated = Depends(ensureAuthenticated)):
+async def finder_pet(request: Request, session: AsyncSession = Depends(db.get_session), ensureClient = Depends(ensure_client)):
 
     http_response = None
 
@@ -64,7 +64,7 @@ async def finder_pet(request: Request, session: AsyncSession = Depends(db.get_se
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
 @router.delete("/delete", response_model=Dict)
-async def delete_pet(request: Request, session: AsyncSession = Depends(db.get_session), ensureAuthenticated = Depends(ensureAuthenticated)):
+async def delete_pet(request: Request, session: AsyncSession = Depends(db.get_session), ensureClient = Depends(ensure_client)):
 
     http_response = None
 
@@ -76,7 +76,7 @@ async def delete_pet(request: Request, session: AsyncSession = Depends(db.get_se
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
 @router.put("/update", response_model=Dict)
-async def update_pet(request: Request, session: AsyncSession = Depends(db.get_session), ensureAuthenticated = Depends(ensureAuthenticated)):
+async def update_pet(request: Request, session: AsyncSession = Depends(db.get_session), ensureClient = Depends(ensure_client)):
 
     http_response = None
 

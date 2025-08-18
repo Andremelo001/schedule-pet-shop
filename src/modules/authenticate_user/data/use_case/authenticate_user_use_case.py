@@ -18,7 +18,7 @@ class AuthenticateUserUseCase(InterfaceAuthentivcateUserUseCase):
 
         await self.verify_user(session, email, senha)
         
-        return jwt_service.create_token({"sub": senha})
+        return jwt_service.create_token({"sub": senha, "role": "client"})
     
     async def verify_user(self, session: AsyncSession, email: str, senha: str) -> None:
 

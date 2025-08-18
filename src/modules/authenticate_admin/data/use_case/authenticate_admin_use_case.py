@@ -14,7 +14,7 @@ class AutheticateAdminUseCase(InterfaceAuthenticateAdminUseCase):
 
         await self.verify_user(session, senha, user)
         
-        return jwt_service.create_token({"sub": senha})
+        return jwt_service.create_token({"sub": senha, "role": "admin"})
     
     async def verify_user(self, session: AsyncSession, senha: str, user: str) -> None:
 
