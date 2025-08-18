@@ -13,5 +13,4 @@ class PetUpdateDTO(SQLModel):
     name: Optional[str] = None
     breed: Optional[str] = None
     age: Optional[int] = None
-    age: Optional[str] = None
     size_in_centimeters: Optional[str] = None

@@ -14,13 +14,17 @@ class ClientUpdateUseCase(InterfaceClientUpdate):
         self.repository = repository
 
     async def update(self, session: AsyncSession, id_client: str, client: ClientUpdateDTO) -> Dict:
-        await self.__client_exists(session, client.cpf, id_client)
 
-        self.__validate_email(client.email)
+        if client.cpf is not None:
+            await self.__client_exists(session, client.cpf, id_client)
 
-        self.__validate_senha(client.senha)
+            client.cpf = self.__format_cpf(client.cpf)
+            
+        if client.email is not None:
+            self.__validate_email(client.email)
 
-        client.cpf = self.__format_cpf(client.cpf)
+        if client.senha is not None:
+            self.__validate_senha(client.senha)
 
         new_client = await self.repository.update_client(session, id_client, client)
     
@@ -51,16 +55,12 @@ class ClientUpdateUseCase(InterfaceClientUpdate):
     @classmethod
     def __format_response(cls, client: Client) -> Dict:
 
-        response = []
-
-        response.append({
+        return {
             'id': str(client.id),
             'name': client.name,
             "cpf": client.cpf,
             'age': client.age,
             'email': client.email,
             'senha': client.senha,
-        })
-
-        return response
+        }
     

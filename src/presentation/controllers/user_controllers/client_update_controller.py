@@ -26,5 +26,3 @@ class ClientUpdateController(ControllerInterface):
                  "data": response
              }
         )
-
-
