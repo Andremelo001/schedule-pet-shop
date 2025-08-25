@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, time
 from sqlmodel import SQLModel, Field, Relationship
 from uuid import UUID, uuid4
 
@@ -18,7 +18,10 @@ class ScheduleServices(SQLModel, table=True):
 
 class ScheduleBase(SQLModel):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
-    date_schedule: datetime
+    date_schedule: date
+    time_schedule: time
+    total_price_schedule: int
+    schedule_active: bool
 
 
 class Schedule(ScheduleBase, table=True):

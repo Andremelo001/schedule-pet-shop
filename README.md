@@ -209,6 +209,7 @@ classDiagram
         id_client: uuid
         id_pet: uuid
         total_price_schedule: int
+        schedule_active: bool
     }
 
     class Services {
