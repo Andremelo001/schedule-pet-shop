@@ -1,0 +1,16 @@
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.infra.db.repositories.service_repository import ServiceRepository
+from src.modules.service_types.data.use_cases.service_list_use_case import ServiceListUseCase
+from src.presentation.controllers.service_controllers.service_list_controller import ServiceListController
+from src.presentation.http_types.http_request import HttpRequest
+
+async def service_list_composer(session: AsyncSession, http_request: HttpRequest):
+
+    repository = ServiceRepository()
+
+    use_case = ServiceListUseCase(repository)
+
+    controller = ServiceListController(use_case)
+
+    return await controller.handle(session, http_request)

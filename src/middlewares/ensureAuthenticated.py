@@ -35,4 +35,11 @@ async def ensure_client(payload: dict = Depends(ensureAuthenticated)):
     
     return payload
 
+async def ensure_delete_schedule(payload: dict = Depends(ensureAuthenticated)):
+
+    roles = payload.get("role", [])
+
+    if not ("request_cancel_schedule" in roles and "admin" in roles):
+        raise HttpUnauthorized("Token only")
+
 

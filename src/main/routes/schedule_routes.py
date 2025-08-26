@@ -10,12 +10,14 @@ from src.main.adapters.request_adapter import request_adapter
 
 #Import Composers
 from src.main.composers.schedule_composers.schedule_create_composer import schedule_create_composer
+from src.main.composers.schedule_composers.request_cancel_schedule_composer import request_cancel_schedule
+from src.main.composers.schedule_composers.cancel_schedule_composer import cancel_schedule
 
 #Import Error Handler
 from src.errors.error_handler import handle_errors
 
 #Import Middlewares
-from src.middlewares.ensureAuthenticated import ensure_client
+from src.middlewares.ensureAuthenticated import ensure_client, ensure_delete_schedule
 
 db = DBConection()
 
@@ -31,6 +33,30 @@ async def create_schedule(request: Request, session: AsyncSession = Depends(db.g
 
     try:
         http_response = await request_adapter(request, session, schedule_create_composer)
+    except Exception as exception:
+        http_response = handle_errors(exception)
+
+    return JSONResponse(content=http_response.body, status_code=http_response.status_code)
+
+@router.post("/request_cancel_schedule", response_model=Dict)
+async def request_cancel(request: Request, session: AsyncSession = Depends(db.get_session), ensureClient = Depends(ensure_client)):
+
+    http_response = None
+
+    try:
+        http_response = await request_adapter(request, session, request_cancel_schedule)
+    except Exception as exception:
+        http_response = handle_errors(exception)
+
+    return JSONResponse(content=http_response.body, status_code=http_response.status_code)
+
+@router.post("/cancel_schedule", response_model=Dict)
+async def cancel(request: Request, session: AsyncSession = Depends(db.get_session), ensureDeleteSchedule = Depends(ensure_delete_schedule)):
+
+    http_response = None
+
+    try:
+        http_response = await request_adapter(request, session, cancel_schedule)
     except Exception as exception:
         http_response = handle_errors(exception)
 

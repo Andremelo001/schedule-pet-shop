@@ -7,7 +7,10 @@ from sqlmodel import select
 from src.modules.service_types.data.interfaces.interface_service_repository import InterfaceServiceRepository
 from src.modules.service_types.domain.models.service import Service
 from src.infra.db.entities.services import Services as ServicesEntitie
-from src.modules.service_types.dto.service_dto import ServiceDTO
+from src.modules.service_types.dto.service_dto import ServiceDTO, UpdateServiceDTO
+
+from src.infra.db.entities.schedule import ScheduleServices, Schedule as ScheduleEntitie
+from src.modules.schedule.domain.models.schedule import Schedule
 
 class ServiceRepository(InterfaceServiceRepository):
 
@@ -28,8 +31,31 @@ class ServiceRepository(InterfaceServiceRepository):
         except Exception as exception:
             await session.rollback()
             raise exception
+        
+    @classmethod
+    async def find_service_by_id(cls, session: AsyncSession, id_service: str) -> Service:
+
+        service = (await session.execute(select(ServicesEntitie).where(ServicesEntitie.id == id_service))).scalar_one_or_none()
+
+        return service
     
     @classmethod
     async def list_services(cls, session: AsyncSession) -> List[Service]:
 
         return (await session.execute(select(ServicesEntitie))).scalars().all()
+    
+    async def update_service(cls, session: AsyncSession, service: UpdateServiceDTO) -> Service: pass
+
+    async def delete_service(cls, session: AsyncSession, id_service: str) -> None:
+
+        service = (await session.execute(select(ServicesEntitie).where(ServicesEntitie.id == id_service))).scalar_one_or_none()
+
+        await session.delete(service)
+
+        await session.commit()
+
+    async def get_schedules_by_service_id(cls, session: AsyncSession, id_service: str) -> List[Schedule]:
+
+        schedules = await session.execute(select(ScheduleEntitie).join(ScheduleServices, ScheduleEntitie.id == ScheduleServices.schedule_id).where(ScheduleServices.services_id == id_service))
+
+        return schedules.scalars().all()

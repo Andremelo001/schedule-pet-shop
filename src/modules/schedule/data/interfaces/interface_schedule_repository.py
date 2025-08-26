@@ -12,6 +12,12 @@ class InterfaceScheduleRepository(ABC):
     async def create_schedule(cls, session: AsyncSession, schedule: ScheduleDTO) -> None: pass
 
     @abstractmethod
+    async def find_email_client_by_id_schedule(cls, session: AsyncSession, id_schedule: str) -> str: pass
+
+    @abstractmethod
+    async def find_schedule_by_id(cls, session: AsyncSession, id_schedule: str) -> Schedule: pass
+
+    @abstractmethod
     async def list_schedules(cls, session: AsyncSession) -> List[Schedule]: pass
 
     @abstractmethod

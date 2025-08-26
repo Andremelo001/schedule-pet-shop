@@ -10,6 +10,8 @@ from src.main.adapters.request_adapter import request_adapter
 
 #Import Composers
 from src.main.composers.service_composers.service_create_composer import service_create_composer
+from src.main.composers.service_composers.service_list_composer import service_list_composer
+from src.main.composers.service_composers.service_delete_composer import service_delete_composer
 
 #Import Error Handler
 from src.errors.error_handler import handle_errors
@@ -31,6 +33,30 @@ async def create_service(request: Request, session: AsyncSession = Depends(db.ge
 
     try:
         http_response = await request_adapter(request, session, service_create_composer)
+    except Exception as exception:
+        http_response = handle_errors(exception)
+
+    return JSONResponse(content=http_response.body, status_code=http_response.status_code)
+
+@router.get("/list", response_model=Dict)
+async def create_service(request: Request, session: AsyncSession = Depends(db.get_session), ensureAdmin = Depends(ensure_admin)):
+
+    http_response = None
+
+    try:
+        http_response = await request_adapter(request, session, service_list_composer)
+    except Exception as exception:
+        http_response = handle_errors(exception)
+
+    return JSONResponse(content=http_response.body, status_code=http_response.status_code)
+
+@router.delete("/delete", response_model=Dict)
+async def delete_service(request: Request, session: AsyncSession = Depends(db.get_session), ensureAdmin = Depends(ensure_admin)):
+
+    http_response = None
+
+    try:
+        http_response = await request_adapter(request, session, service_delete_composer)
     except Exception as exception:
         http_response = handle_errors(exception)
 

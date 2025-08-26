@@ -10,6 +10,8 @@ from src.modules.schedule.data.interfaces.interface_schedule_repository import I
 from src.infra.db.entities.services import Services
 from src.infra.db.entities.schedule import Schedule as ScheduleEntitie, ScheduleServices
 
+from src.infra.db.entities.client import Client
+
 class ScheduleRepository(InterfaceScheduleRepository):
 
     @classmethod
@@ -50,7 +52,21 @@ class ScheduleRepository(InterfaceScheduleRepository):
         except Exception as exception:
             await session.rollback()
             raise exception
+        
+    @classmethod
+    async def find_email_client_by_id_schedule(cls, session: AsyncSession, id_schedule: str) -> str:
 
+        result = await session.execute(select(Client.email).join(ScheduleEntitie, ScheduleEntitie.client_id == Client.id).where(ScheduleEntitie.id == id_schedule))
+        
+        return result.scalar_one_or_none()
+        
+    @classmethod
+    async def find_schedule_by_id(cls, session: AsyncSession, id_schedule: str) -> Schedule:
+
+        schedule = (await session.execute(select(ScheduleEntitie).where(ScheduleEntitie.id == id_schedule))).scalar_one_or_none()
+
+        return schedule
+    
     @classmethod
     async def list_schedules(cls, session: AsyncSession) -> List[Schedule]:
 
