@@ -1,10 +1,11 @@
-from typing import List, Dict
+from typing import List
 from uuid import uuid4
 from datetime import date
 from sqlmodel import select
+from sqlalchemy.orm import selectinload
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.modules.schedule.dto.schedule_dto import ScheduleDTO, ScheduleUpdateDTO
+from src.modules.schedule.dto.schedule_dto import ScheduleDTO
 from src.modules.schedule.domain.models.schedule import Schedule
 from src.modules.schedule.data.interfaces.interface_schedule_repository import InterfaceScheduleRepository
 from src.infra.db.entities.services import Services
@@ -70,7 +71,7 @@ class ScheduleRepository(InterfaceScheduleRepository):
     @classmethod
     async def list_schedules(cls, session: AsyncSession) -> List[Schedule]:
 
-        return (await session.execute(select(ScheduleEntitie))).scalars().all()
+        return (await session.execute(select(ScheduleEntitie).options(selectinload(ScheduleEntitie.services)))).scalars().all()
 
     @classmethod
     async def find_schedule_by_id_client(cls, session: AsyncSession, id_client: str) -> List[Schedule]:
@@ -91,7 +92,7 @@ class ScheduleRepository(InterfaceScheduleRepository):
     @classmethod
     async def find_schedules_available(cls, session: AsyncSession) -> List[Schedule]:
 
-        return (await session.execute(select(ScheduleEntitie).where(ScheduleEntitie.schedule_active == True))).scalars().all()
+        return (await session.execute(select(ScheduleEntitie).options(selectinload(ScheduleEntitie.services)).where(ScheduleEntitie.schedule_active == True))).scalars().all()
 
     @classmethod
     async def delete_schedule(cls, session: AsyncSession, id_schedule: str) -> None:
@@ -100,19 +101,6 @@ class ScheduleRepository(InterfaceScheduleRepository):
 
         await session.delete(schedule)
         await session.commit()
-
-    @classmethod
-    async def update_schedule(cls, session: AsyncSession, id_schedule: str, schedule: ScheduleUpdateDTO) -> Schedule:
-
-        new_schedule = (await session.execute(select(ScheduleEntitie).where(ScheduleEntitie.id == id_schedule))).scalar_one_or_none()
-
-        for key, value in schedule.model_dump(exclude_unset=True).items():
-            setattr(new_schedule, key, value)
-
-        await session.commit()
-        await session.refresh(new_schedule)
-
-        return new_schedule
     
     @classmethod
     async def duration_services_in_schedule(cls, session: AsyncSession, list_services: List[str]) -> int:

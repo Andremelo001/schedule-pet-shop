@@ -3,7 +3,7 @@ from typing import List, Dict
 from datetime import date
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.modules.schedule.dto.schedule_dto import ScheduleDTO, ScheduleUpdateDTO
+from src.modules.schedule.dto.schedule_dto import ScheduleDTO
 from src.modules.schedule.domain.models.schedule import Schedule
 
 class InterfaceScheduleRepository(ABC):
@@ -31,9 +31,6 @@ class InterfaceScheduleRepository(ABC):
 
     @abstractmethod
     async def delete_schedule(cls, session: AsyncSession, id_schedule: str) -> None: pass
-
-    @abstractmethod
-    async def update_schedule(cls, session: AsyncSession, id_schedule: str, schedule: ScheduleUpdateDTO) -> Schedule: pass
 
     @abstractmethod
     async def duration_services_in_schedule(cls, session: AsyncSession, list_services: List[str]) -> int: pass

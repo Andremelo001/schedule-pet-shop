@@ -44,7 +44,17 @@ class ServiceRepository(InterfaceServiceRepository):
 
         return (await session.execute(select(ServicesEntitie))).scalars().all()
     
-    async def update_service(cls, session: AsyncSession, service: UpdateServiceDTO) -> Service: pass
+    async def update_service(cls, session: AsyncSession, service: UpdateServiceDTO, id_service: str) -> Service:
+
+        new_service = (await session.execute(select(ServicesEntitie).where(ServicesEntitie.id == id_service))).scalar_one_or_none()
+
+        for key, value in service.model_dump(exclude_unset=True).items():
+            setattr(new_service, key, value)
+
+        await session.commit()
+        await session.refresh(new_service)
+
+        return new_service
 
     async def delete_service(cls, session: AsyncSession, id_service: str) -> None:
 

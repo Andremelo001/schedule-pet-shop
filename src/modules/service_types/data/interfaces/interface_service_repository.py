@@ -19,7 +19,7 @@ class InterfaceServiceRepository(ABC):
     async def find_service_by_id(cls, session: AsyncSession, id_service: str) -> Service: pass
 
     @abstractmethod
-    async def update_service(cls, session: AsyncSession, service: UpdateServiceDTO) -> Service: pass
+    async def update_service(cls, session: AsyncSession, service: UpdateServiceDTO, id_service: str) -> Service: pass
 
     @abstractmethod
     async def delete_service(cls, session: AsyncSession, id_service: str) -> None: pass
