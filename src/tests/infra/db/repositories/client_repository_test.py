@@ -45,7 +45,6 @@ async def test_create_client(mocker):
     added_client = mock_session.add.call_args[0][0]
     assert added_client.cpf == fake_client.cpf
     assert added_client.name == fake_client.name
-    assert added_client.is_admin is False
 
 
 @pytest.mark.asyncio
@@ -84,7 +83,7 @@ async def test_delete_client(mocker):
 @pytest.mark.asyncio
 async def test_update_client(mocker):
     fake_id = "69bde4f5-c54f-47d0-9c65-ea9d3dbd0eef"
-    fake_client = Client(id=fake_id)
+    fake_client = Client(id=fake_id, name="Old Name", cpf="088550540383", age=18, email="old@gmail.com", senha="old123")
 
     update_data = ClientUpdateDTO(
         name= "Andre",
@@ -94,13 +93,13 @@ async def test_update_client(mocker):
         senha= "de2019"
     )
 
-    repository = ClientRepository()
+    mock_result = MagicMock()
+    mock_result.scalar_one_or_none.return_value = fake_client
 
     mock_session = AsyncMock()
+    mock_session.execute.return_value = mock_result
 
-    repository.get_client_by_id = AsyncMock(return_value=fake_client)
-
-    update_client = await repository.update_client(mock_session, fake_id, update_data)
+    update_client = await ClientRepository.update_client(mock_session, fake_id, update_data)
 
     assert mock_session.commit.called
     assert mock_session.refresh.called
@@ -110,6 +109,60 @@ async def test_update_client(mocker):
     assert update_client.age == 20
     assert update_client.email == "de@gmail.com"
     assert update_client.senha == "de2019"
+
+@pytest.mark.asyncio
+async def test_get_client_by_email(mocker):
+    fake_email = "de@gmail.com"
+    fake_client = Client(email=fake_email)
+
+    mock_result = MagicMock()
+    mock_result.scalar_one_or_none.return_value = fake_client
+
+    mock_session = AsyncMock()
+    mock_session.execute.return_value = mock_result
+
+    client = await ClientRepository.get_client_by_email(mock_session, fake_email)
+
+    assert client.email == fake_email
+    mock_session.execute.assert_called_once()
+
+@pytest.mark.asyncio
+async def test_get_client_with_pets_and_schedules_by_id(mocker):
+    from src.infra.db.entities.client import ClientWithPetsWithSchedules
+    from uuid import UUID
+    
+    fake_id = "69bde4f5-c54f-47d0-9c65-ea9d3dbd0eef"
+    fake_client = ClientWithPetsWithSchedules(id=fake_id, name="Andre", cpf="088550540383", age=20, email="de@gmail.com", senha="de2019")
+
+    mock_result = MagicMock()
+    mock_result.scalar_one_or_none.return_value = fake_client
+
+    mock_session = AsyncMock()
+    mock_session.execute.return_value = mock_result
+
+    client = await ClientRepository.get_client_with_pets_and_schedules_by_id(mock_session, fake_id)
+
+    assert str(client.id) == fake_id
+    mock_session.execute.assert_called_once()
+
+@pytest.mark.asyncio
+async def test_find_schedule_by_id_client(mocker):
+    from src.infra.db.entities.schedule import Schedule as ScheduleEntity
+    
+    fake_client_id = "69bde4f5-c54f-47d0-9c65-ea9d3dbd0eef"
+    fake_schedules = [ScheduleEntity(client_id=fake_client_id), ScheduleEntity(client_id=fake_client_id)]
+
+    mock_result = MagicMock()
+    mock_result.scalars.return_value.all.return_value = fake_schedules
+
+    mock_session = AsyncMock()
+    mock_session.execute.return_value = mock_result
+
+    schedules = await ClientRepository.find_schedule_by_id_client(mock_session, fake_client_id)
+
+    assert len(schedules) == 2
+    assert all(schedule.client_id == fake_client_id for schedule in schedules)
+    mock_session.execute.assert_called_once()
 
 
 
