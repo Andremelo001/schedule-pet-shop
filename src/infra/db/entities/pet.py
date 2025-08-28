@@ -16,6 +16,6 @@ class PetBase(SQLModel):
 
 
 class Pet(PetBase, table=True):
-    client_id: UUID = Field(foreign_key="client.id")
+    client_id: UUID = Field(foreign_key="client.id", ondelete="CASCADE")
     client: "Client" = Relationship(back_populates="pets")
-    schedules: list["Schedule"] = Relationship(back_populates="pet")
+    schedules: list["Schedule"] = Relationship(back_populates="pet", sa_relationship_kwargs={"cascade": "all, delete-orphan"})

@@ -15,13 +15,13 @@ class RequestCancelScheduleUseCase(InterfaceRequestCancelScheduleUsecase):
 
         jwt_service = JWTService()
 
-        await self.__schedule_already_exists(session, id_schedule)
+        await self.__schedule_not_found(session, id_schedule)
 
         token = jwt_service.create_token({"sub": id_schedule, "role": ["request_cancel_schedule", "admin"]})
 
         return self.__format_response(id_schedule, token)
     
-    async def __schedule_already_exists(self, session: AsyncSession, id_schedule: str) -> None:
+    async def __schedule_not_found(self, session: AsyncSession, id_schedule: str) -> None:
 
         schedule = await self.repository.find_schedule_by_id(session, id_schedule)
 

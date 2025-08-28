@@ -9,21 +9,11 @@ from src.modules.pet.dto.pet_dto import PetDTO, PetUpdateDTO
 from src.modules.pet.domain.models.pet import Pet
 from src.infra.db.entities.pet import Pet as PetEntitie
 from src.infra.db.entities.client import Client as ClientEntitie
-from src.infra.db.repositories.client_repository import ClientRepository
-
-from src.errors.types_errors import HttpNotFoundError
 
 class PetRepository(InterfacePetRepository):
     
     @classmethod
     async def create_pet(cls, session: AsyncSession, id_client: str, pet: PetDTO) -> Pet:
-
-        client = ClientRepository()
-
-        pet_client = await client.get_client_by_id(session, id_client)
-
-        if not pet_client:
-            raise HttpNotFoundError(f"Cliente com o id {id_client} não encontrado")
 
         try: 
             new_pet = PetEntitie(
@@ -32,7 +22,7 @@ class PetRepository(InterfacePetRepository):
                 breed= pet.breed,
                 age= pet.age,
                 size_in_centimeters= pet.size_in_centimeters,
-                client_id= pet_client.id,
+                client_id= id_client,
             )
 
             session.add(new_pet)

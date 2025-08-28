@@ -25,8 +25,8 @@ class ScheduleBase(SQLModel):
 
 
 class Schedule(ScheduleBase, table=True):
-    client_id: UUID = Field(foreign_key="client.id")
-    pet_id: UUID = Field(foreign_key="pet.id")
+    client_id: UUID = Field(foreign_key="client.id", ondelete="CASCADE")
+    pet_id: UUID = Field(foreign_key="pet.id", ondelete="CASCADE")
     client: "Client" = Relationship(back_populates="schedules")
     pet: "Pet" = Relationship(back_populates="schedules")
     services: list["Services"] = Relationship(link_model=ScheduleServices)

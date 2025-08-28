@@ -14,7 +14,7 @@ class ScheduleDeleteUseCase(InterfaceScheduleDeleteUsecase):
 
     async def delete(self, session: AsyncSession, id_schedule: str) -> Dict:
 
-        await self.__schedule_already_exists(session, id_schedule)
+        await self.__schedule_not_found(session, id_schedule)
 
         await self.__verify_schedule_date_has_passed(session, id_schedule)
 
@@ -23,7 +23,7 @@ class ScheduleDeleteUseCase(InterfaceScheduleDeleteUsecase):
         return {"message": "Agendamento deletado com sucesso"}
 
     
-    async def __schedule_already_exists(self, session: AsyncSession, id_schedule: str) -> None:
+    async def __schedule_not_found(self, session: AsyncSession, id_schedule: str) -> None:
 
         schedule = await self.repository.find_schedule_by_id(session, id_schedule)
 

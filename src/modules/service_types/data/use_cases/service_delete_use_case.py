@@ -13,7 +13,7 @@ class ServiceDeleteUseCase(InterfaceServiceDelete):
     
     async def delete(self, session: AsyncSession, id_service: str) -> None:
 
-        await self.__service_already_exists(session, id_service)
+        await self.__service_not_found(session, id_service)
 
         await self.__already_exists_schedules_by_service_id(session, id_service)
 
@@ -21,7 +21,7 @@ class ServiceDeleteUseCase(InterfaceServiceDelete):
 
         return {"message": "Serviço deletado com sucesso"}
 
-    async def __service_already_exists(self, session: AsyncSession, id_service: str) -> None:
+    async def __service_not_found(self, session: AsyncSession, id_service: str) -> None:
 
         service = await self.repository.find_service_by_id(session, id_service)
 

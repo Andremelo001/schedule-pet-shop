@@ -14,8 +14,8 @@ class ClientBase(SQLModel):
 
 
 class Client(ClientBase, table=True):
-    pets: list["Pet"] = Relationship(back_populates="client")
-    schedules: list["Schedule"] = Relationship(back_populates="client")
+    pets: list["Pet"] = Relationship(back_populates="client", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
+    schedules: list["Schedule"] = Relationship(back_populates="client", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
 
 
 class ClientWithPetsWithSchedules(ClientBase):

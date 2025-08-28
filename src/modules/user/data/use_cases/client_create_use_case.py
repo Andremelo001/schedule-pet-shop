@@ -12,12 +12,12 @@ from src.errors.types_errors import HttpBadRequestError, HttpConflitError
 
 
 class CreateClientUseCase(InterfaceClientCreate):
-    def __init__(self, client_repository: InterfaceClientRepository):
-        self.__client_repository = client_repository
+    def __init__(self, repository: InterfaceClientRepository):
+        self.repository = repository
 
     async def create(self, session: AsyncSession, client: ClientDTO) -> Dict:
 
-        await self.client_exists(session, client.cpf)
+        await self.__client_exists(session, client.cpf)
         
         self.validate_email(client.email)
 
@@ -41,7 +41,8 @@ class CreateClientUseCase(InterfaceClientCreate):
         if not bool(re.match(r'^(?=.*[A-Z])(?=.*\d).{8,}$', senha)):
             raise HttpBadRequestError("A senha deve conter pelo menos uma letra maiúscula, um número e ter no mínimo 8 caracteres")
         
-    def encrypt_senha(self, senha: str) -> str:
+    @classmethod
+    def encrypt_senha(cls, senha: str) -> str:
 
         password_hasher = PasswordHasher()
 
@@ -54,13 +55,13 @@ class CreateClientUseCase(InterfaceClientCreate):
 
         return ClientFinderUseCase.validate_cpf(cpf_client)
 
-    async def client_exists(self, session: AsyncSession, cpf: str) -> None:
-        client_exists = await self.__client_repository.get_client(session, cpf)
+    async def __client_exists(self, session: AsyncSession, cpf: str) -> None:
+        client_exists = await self.repository.get_client(session, cpf)
 
         if client_exists:
             raise HttpConflitError(f"Cliente com o cpf {cpf} já existe")
         
     async def __register_client_informations(self, session: AsyncSession, client: ClientDTO) -> Dict:
-        await self.__client_repository.create_client(session, client)
+        await self.repository.create_client(session, client)
 
         return {"message": "Cliente cadastrado com sucesso"}

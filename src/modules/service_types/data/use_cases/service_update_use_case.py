@@ -22,7 +22,7 @@ class ServiceUpdateUseCase(InterfaceServiceUpdate):
 
         await self.__validate_service_in_schedule(session, id_service)
 
-        await self.__service_already_exists(session, id_service)
+        await self.__service_not_found(session, id_service)
 
         new_service = await self.repository.update_service(session, service, id_service)
 
@@ -36,7 +36,7 @@ class ServiceUpdateUseCase(InterfaceServiceUpdate):
         if type_service not in valid_services:
             raise HttpUnauthorized(f"Tipo de serviço não aceito, escolha um dos serviços disponíveis: {', '.join(valid_services)}")
         
-    async def __service_already_exists(self, session: AsyncSession, id_service: str) -> None:
+    async def __service_not_found(self, session: AsyncSession, id_service: str) -> None:
 
         service = await self.repository.find_service_by_id(session, id_service)
 

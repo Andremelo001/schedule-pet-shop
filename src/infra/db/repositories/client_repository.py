@@ -3,6 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 from sqlalchemy.orm import selectinload
 
+from typing import List
+
 from src.infra.db.entities.client import Client as ClientEntitie, ClientWithPetsWithSchedules
 from src.infra.db.entities.pet import Pet
 from src.infra.db.entities.schedule import Schedule
@@ -11,8 +13,6 @@ from src.modules.user.data.interfaces.interface_client_repository import Interfa
 from src.modules.user.domain.models.client import Client
 
 from src.modules.user.dto.client_dto import ClientDTO, ClientUpdateDTO
-
-from src.errors.types_errors import HttpNotFoundError
 
 
 class ClientRepository(InterfaceClientRepository):
@@ -51,12 +51,10 @@ class ClientRepository(InterfaceClientRepository):
             await session.rollback()
             raise exception
         
-    async def update_client(self, session: AsyncSession, id_client: str, client: ClientUpdateDTO) -> Client:
+    @classmethod
+    async def update_client(cls, session: AsyncSession, id_client: str, client: ClientUpdateDTO) -> Client:
 
-        new_client = await self.get_client_by_id(session, id_client)
-        
-        if not new_client:
-            raise HttpNotFoundError(f"Cliente com o {id_client} não encontrado")
+        new_client = (await session.execute(select(ClientEntitie).where(ClientEntitie.id == id_client))).scalar_one_or_none()
 
         for key, value in client.model_dump(exclude_unset=True).items():
             setattr(new_client, key, value)
@@ -66,22 +64,10 @@ class ClientRepository(InterfaceClientRepository):
 
         return new_client
     
-    async def delete_client(self, session: AsyncSession, id_client: str) -> None:
+    @classmethod
+    async def delete_client(cls, session: AsyncSession, id_client: str) -> None:
 
-        client = await self.get_client_by_id(session, id_client)
-
-        if not client:
-            raise HttpNotFoundError(f"Cliente com o id {id_client} não foi encontrado")
-
-        pets = (await session.execute(select(Pet).where(Pet.client_id == id_client))).scalars().all()
-
-        for pet in pets:
-            await session.delete(pet)
-
-        schedules = (await session.execute(select(Schedule).where(Schedule.client_id == id_client))).scalars().all()
-
-        for schedule in schedules:
-            await session.delete(schedule)
+        client = (await session.execute(select(ClientEntitie).where(ClientEntitie.id == id_client))).scalar_one_or_none()
 
         await session.delete(client)
         await session.commit()
@@ -99,3 +85,8 @@ class ClientRepository(InterfaceClientRepository):
         client = (await session.execute(select(ClientEntitie).options(selectinload(ClientEntitie.pets), selectinload(ClientEntitie.schedules)).where(ClientEntitie.id == id_client))).scalar_one_or_none()
 
         return client
+    
+    @classmethod
+    async def find_schedule_by_id_client(cls, session: AsyncSession, id_client: str) -> List[Schedule]:
+
+        return (await session.execute(select(Schedule).where(Schedule.client_id == id_client))).scalars().all()

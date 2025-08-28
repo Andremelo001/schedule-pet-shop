@@ -7,13 +7,15 @@ from src.modules.user.data.use_cases.client_create_use_case import CreateClientU
 from src.modules.user.dto.client_dto import ClientUpdateDTO
 from src.modules.user.domain.models.client import Client
 
-from src.errors.types_errors import HttpConflitError
+from src.errors.types_errors import HttpConflitError, HttpNotFoundError
 
 class ClientUpdateUseCase(InterfaceClientUpdate):
     def __init__(self, repository: InterfaceClientRepository):
         self.repository = repository
 
     async def update(self, session: AsyncSession, id_client: str, client: ClientUpdateDTO) -> Dict:
+
+        await self.__client_not_found(session, id_client)
 
         if client.cpf is not None:
             await self.__client_exists(session, client.cpf, id_client)
@@ -29,9 +31,18 @@ class ClientUpdateUseCase(InterfaceClientUpdate):
         new_client = await self.repository.update_client(session, id_client, client)
     
         return self.__format_response(new_client)
+    
+
+    async def __client_not_found(self, session: AsyncSession, id_client: str):
+
+        client = await self.repository.get_client_by_id(session, id_client)
+
+        if not client:
+            raise HttpNotFoundError(f"Cliente com o id {id_client} não encontrado")
 
     
     async def __client_exists(self, session: AsyncSession, cpf: str, id_client: str) -> None:
+
         client = await self.repository.get_client(session, cpf)
 
         if client and str(client.id) != id_client:
@@ -39,16 +50,19 @@ class ClientUpdateUseCase(InterfaceClientUpdate):
 
     @classmethod
     def __validate_email(cls, email: str) -> None:
+
         if email is not None:
             CreateClientUseCase.validate_email(email)
 
     @classmethod
     def __validate_senha(cls, senha: str) -> None:
+
         if senha is not None:
             CreateClientUseCase.validate_senha(senha)
         
     @classmethod
     def __format_cpf(cls, cpf) -> str:
+
         if cpf is not None:
             return CreateClientUseCase.format_cpf(cpf)
 

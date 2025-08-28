@@ -13,13 +13,13 @@ class GetClientWithPetsAndSchedulesUseCase(InterfaceGetClientWithPetsAndSchedule
 
     async def get_client_with_pets_and_schedules(self, session: AsyncSession, id_client: str) -> Dict:
 
-        await self.__client_already_exists(session, id_client)
+        await self.__client_not_found(session, id_client)
 
         client = await self.repository.get_client_with_pets_and_schedules_by_id(session, id_client)
 
         return self.__format_response(client)
 
-    async def __client_already_exists(self, session: AsyncSession, id_client: str):
+    async def __client_not_found(self, session: AsyncSession, id_client: str):
 
         client = await self.repository.get_client_by_id(session, id_client)
 

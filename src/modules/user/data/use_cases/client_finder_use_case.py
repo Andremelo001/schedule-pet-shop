@@ -9,8 +9,8 @@ from src.modules.user.domain.models.client import Client
 from src.errors.types_errors import HttpNotFoundError, HttpBadRequestError
 
 class ClientFinderUseCase(InterfaceClientFinder):
-    def __init__(self, client_repository: InterfaceClientRepository) -> None:
-        self.__client_repository = client_repository
+    def __init__(self, repository: InterfaceClientRepository) -> None:
+        self.repository = repository
 
     async def find(self, session: AsyncSession, cpf_client: str) -> Dict:
 
@@ -46,23 +46,18 @@ class ClientFinderUseCase(InterfaceClientFinder):
     
     @classmethod
     def __format_response(cls, client: Client) -> Dict:
-        
-        response = []
 
-        response.append(
-            {
+            return {
+                
                 "id": str(client.id),
                 "name": client.name,
                 "age": client.age,
                 "email": client.email,
                 "senha": client.senha
             }
-        )
-
-        return response
         
     async def __find_client(self, session: AsyncSession, cpf_client: str) -> Client:
-        client = await self.__client_repository.get_client(session, cpf_client)
+        client = await self.repository.get_client(session, cpf_client)
 
         if not client:
             raise HttpNotFoundError(f"Nenhum cliente encontrado com o cpf {cpf_client}")
