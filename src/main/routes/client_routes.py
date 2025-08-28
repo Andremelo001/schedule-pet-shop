@@ -14,6 +14,7 @@ from src.main.composers.client_composers.client_finder_composer import client_fi
 from src.main.composers.client_composers.client_update_composer import client_update_composer
 from src.main.composers.client_composers.client_delete_composer import client_delete_composer
 from src.main.composers.authenticate_user_composers.generate_token_composer import generate_token_composer
+from src.main.composers.client_composers.get_client_with_pets_and_schedules_composer import get_client_with_pets_and_schedules_composer
 
 #Import Error Handler
 from src.errors.error_handler import handle_errors
@@ -84,6 +85,18 @@ async def login_client(request: Request, session: AsyncSession = Depends(db.get_
 
     try:
         http_response = await request_adapter(request, session, generate_token_composer)
+    except Exception as exception:
+        http_response = handle_errors(exception)
+
+    return JSONResponse(content=http_response.body, status_code=http_response.status_code)
+
+@router.get("/get_client_with_pets_and_schedules", response_model=Dict)
+async def get_client_with_pets_and_schedules(request: Request, session: AsyncSession = Depends(db.get_session), ensureAdmin = Depends(ensure_admin)):
+
+    http_response = None
+
+    try:
+        http_response = await request_adapter(request, session, get_client_with_pets_and_schedules_composer)
     except Exception as exception:
         http_response = handle_errors(exception)
 

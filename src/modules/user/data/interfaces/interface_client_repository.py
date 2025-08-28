@@ -2,12 +2,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from abc import ABC, abstractmethod
 
 from src.modules.user.domain.models.client import Client
+from src.infra.db.entities.client import ClientWithPetsWithSchedules
 from src.modules.user.dto.client_dto import ClientDTO, ClientUpdateDTO
 
 class InterfaceClientRepository(ABC):
 
     @abstractmethod
     async def get_client_by_id(cls, session: AsyncSession, id_client: str) -> Client: pass
+
+    @abstractmethod
+    async def get_client_with_pets_and_schedules_by_id(cls, session: AsyncSession, id_client: str) -> ClientWithPetsWithSchedules: pass
 
     @abstractmethod
     async def get_client(cls, session: AsyncSession, cpf_client: str) -> Client: pass

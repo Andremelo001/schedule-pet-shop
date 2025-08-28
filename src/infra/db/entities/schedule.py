@@ -30,9 +30,3 @@ class Schedule(ScheduleBase, table=True):
     client: "Client" = Relationship(back_populates="schedules")
     pet: "Pet" = Relationship(back_populates="schedules")
     services: list["Services"] = Relationship(link_model=ScheduleServices)
-
-
-class ScheduleWithClientPetServices(ScheduleBase):
-    client: "ClientBase"
-    pet: "PetBase"
-    services: list["Services"]

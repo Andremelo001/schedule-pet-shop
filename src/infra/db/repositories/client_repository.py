@@ -1,8 +1,9 @@
 from uuid import uuid4
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
+from sqlalchemy.orm import selectinload
 
-from src.infra.db.entities.client import Client as ClientEntitie
+from src.infra.db.entities.client import Client as ClientEntitie, ClientWithPetsWithSchedules
 from src.infra.db.entities.pet import Pet
 from src.infra.db.entities.schedule import Schedule
 
@@ -91,3 +92,10 @@ class ClientRepository(InterfaceClientRepository):
         user = await session.execute(select(ClientEntitie).where(ClientEntitie.email == email))
 
         return user.scalar_one_or_none()
+    
+    @classmethod
+    async def get_client_with_pets_and_schedules_by_id(cls, session: AsyncSession, id_client: str) -> ClientWithPetsWithSchedules:
+
+        client = (await session.execute(select(ClientEntitie).options(selectinload(ClientEntitie.pets), selectinload(ClientEntitie.schedules)).where(ClientEntitie.id == id_client))).scalar_one_or_none()
+
+        return client

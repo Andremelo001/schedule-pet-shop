@@ -1,7 +1,7 @@
 from sqlmodel import SQLModel, Field, Relationship
 from uuid import UUID, uuid4
 from src.infra.db.entities.pet import Pet, PetBase
-from src.infra.db.entities.schedule import Schedule
+from src.infra.db.entities.schedule import Schedule, ScheduleBase
 
 
 class ClientBase(SQLModel):
@@ -18,5 +18,6 @@ class Client(ClientBase, table=True):
     schedules: list["Schedule"] = Relationship(back_populates="client")
 
 
-class ClientBaseWithPets(ClientBase):
+class ClientWithPetsWithSchedules(ClientBase):
     pets: list["PetBase"] = []
+    schedules: list["ScheduleBase"] = []
