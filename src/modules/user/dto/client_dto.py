@@ -12,5 +12,3 @@ class ClientUpdateDTO(SQLModel):
     name: Optional[str] = None
     cpf: Optional[str] = None
     age: Optional[int] = None
-    email: Optional[str] = None
-    senha: Optional[str] = None

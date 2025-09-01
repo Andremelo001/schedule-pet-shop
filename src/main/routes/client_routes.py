@@ -3,6 +3,10 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Dict
 
+#import dtos from documentation Swagger
+from src.modules.user.dto.client_dto import ClientDTO, ClientUpdateDTO
+from src.modules.authenticate_user.dto.authenticate_user_dto import LoginRequest 
+
 from src.infra.db.settings.connection import DBConection
 
 #Import Adapters
@@ -29,7 +33,15 @@ router = APIRouter(
     tags=["Clients"],
 )
 
-@router.post("/create", response_model=Dict)
+@router.post("/create", response_model=Dict, openapi_extra={
+        "requestBody": {
+            "content": {
+                "application/json": {
+                    "schema": ClientDTO.model_json_schema()
+                }   
+            }
+        }
+    })
 async def create_client(request: Request, session: AsyncSession = Depends(db.get_session)):
 
     http_response = None
@@ -42,7 +54,17 @@ async def create_client(request: Request, session: AsyncSession = Depends(db.get
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
 
-@router.get("/find", response_model=Dict)
+@router.get("/find", response_model=Dict, openapi_extra={
+    "security": [{"BearerAuth": []}],
+    "parameters": [
+        {
+            "name": "cpf_client",
+            "in": "query",
+            "required": True,
+            "schema": {"type": "string"},
+        }
+    ]
+})
 async def get_client(request: Request, session: AsyncSession = Depends(db.get_session), ensureAdmin = Depends(ensure_admin)):
 
     http_response = None
@@ -54,7 +76,16 @@ async def get_client(request: Request, session: AsyncSession = Depends(db.get_se
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
-@router.put("/update", response_model=Dict)
+@router.put("/update", response_model=Dict, openapi_extra={
+        "security": [{"BearerAuth": []}],
+        "requestBody": {
+            "content": {
+                "application/json": {
+                    "schema": ClientUpdateDTO.model_json_schema()
+                }   
+            }
+        }
+    })
 async def update_client(request: Request, session: AsyncSession = Depends(db.get_session), ensureAdmin = Depends(ensure_admin)):
 
     http_response = None
@@ -66,7 +97,17 @@ async def update_client(request: Request, session: AsyncSession = Depends(db.get
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
-@router.delete("/delete", response_model=Dict)
+@router.delete("/delete", response_model=Dict, openapi_extra={
+    "security": [{"BearerAuth": []}],
+    "parameters": [
+        {
+            "name": "id_client",
+            "in": "query",
+            "required": True,
+            "schema": {"type": "string"},
+        }
+    ]
+})
 async def delete_client(request: Request, session: AsyncSession = Depends(db.get_session), ensureAdmin = Depends(ensure_admin)):
 
     http_response = None
@@ -78,7 +119,15 @@ async def delete_client(request: Request, session: AsyncSession = Depends(db.get
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
-@router.post("/login", response_model=Dict)
+@router.post("/login", response_model=Dict, openapi_extra={
+        "requestBody": {
+            "content": {
+                "application/json": {
+                    "schema": LoginRequest.model_json_schema()
+                }   
+            }
+        }
+    })
 async def login_client(request: Request, session: AsyncSession = Depends(db.get_session)):
 
     http_response = None
@@ -90,7 +139,17 @@ async def login_client(request: Request, session: AsyncSession = Depends(db.get_
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
-@router.get("/get_client_with_pets_and_schedules", response_model=Dict)
+@router.get("/get_client_with_pets_and_schedules", response_model=Dict, openapi_extra={
+    "security": [{"BearerAuth": []}],
+    "parameters": [
+        {
+            "name": "id_client",
+            "in": "query",
+            "required": True,
+            "schema": {"type": "string"},
+        }
+    ]
+})
 async def get_client_with_pets_and_schedules(request: Request, session: AsyncSession = Depends(db.get_session), ensureAdmin = Depends(ensure_admin)):
 
     http_response = None

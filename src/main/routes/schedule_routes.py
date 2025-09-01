@@ -5,6 +5,9 @@ from typing import Dict
 
 from src.infra.db.settings.connection import DBConection
 
+#import dtos from documentation Swagger
+from src.modules.schedule.dto.schedule_dto import ScheduleDTO
+
 #Import Adapters
 from src.main.adapters.request_adapter import request_adapter
 
@@ -29,7 +32,16 @@ router = APIRouter(
     tags=["Schedules"],
 )
 
-@router.post("/create", response_model=Dict)
+@router.post("/create", response_model=Dict, openapi_extra={
+        "security": [{"BearerAuth": []}],
+        "requestBody": {
+            "content": {
+                "application/json": {
+                    "schema": ScheduleDTO.model_json_schema()
+                }   
+            }
+        }
+    })
 async def create_schedule(request: Request, session: AsyncSession = Depends(db.get_session), ensureClient = Depends(ensure_client)):
 
     http_response = None
@@ -41,7 +53,17 @@ async def create_schedule(request: Request, session: AsyncSession = Depends(db.g
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
-@router.post("/request_cancel_schedule", response_model=Dict)
+@router.post("/request_cancel_schedule", response_model=Dict, openapi_extra={
+    "security": [{"BearerAuth": []}],
+    "parameters": [
+        {
+            "name": "id_schedule",
+            "in": "query",
+            "required": True,
+            "schema": {"type": "string"},
+        }
+    ]
+})
 async def request_cancel(request: Request, session: AsyncSession = Depends(db.get_session), ensureClient = Depends(ensure_client)):
 
     http_response = None
@@ -53,7 +75,17 @@ async def request_cancel(request: Request, session: AsyncSession = Depends(db.ge
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
-@router.post("/cancel_schedule", response_model=Dict)
+@router.post("/cancel_schedule", response_model=Dict, openapi_extra={
+    "security": [{"BearerAuth": []}],
+    "parameters": [
+        {
+            "name": "id_schedule",
+            "in": "query",
+            "required": True,
+            "schema": {"type": "string"},
+        }
+    ]
+})
 async def cancel(request: Request, session: AsyncSession = Depends(db.get_session), ensureDeleteSchedule = Depends(ensure_delete_schedule)):
 
     http_response = None
@@ -65,7 +97,17 @@ async def cancel(request: Request, session: AsyncSession = Depends(db.get_sessio
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
-@router.delete("/delete", response_model=Dict)
+@router.delete("/delete", response_model=Dict, openapi_extra={
+    "security": [{"BearerAuth": []}],
+    "parameters": [
+        {
+            "name": "id_schedule",
+            "in": "query",
+            "required": True,
+            "schema": {"type": "string"},
+        }
+    ]
+})
 async def delete(request: Request, session: AsyncSession = Depends(db.get_session), ensureAdmin = Depends(ensure_admin)):
 
     http_response = None
@@ -77,7 +119,9 @@ async def delete(request: Request, session: AsyncSession = Depends(db.get_sessio
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
-@router.get("/list", response_model=Dict)
+@router.get("/list", response_model=Dict, openapi_extra={
+    "security": [{"BearerAuth": []}]
+})
 async def list(request: Request, session: AsyncSession = Depends(db.get_session), ensureAdmin = Depends(ensure_admin)):
 
     http_response = None
@@ -89,7 +133,9 @@ async def list(request: Request, session: AsyncSession = Depends(db.get_session)
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
-@router.get("/list_schedules_actives", response_model=Dict)
+@router.get("/list_schedules_actives", response_model=Dict, openapi_extra={
+    "security": [{"BearerAuth": []}]
+})
 async def list_schedules_actives(request: Request, session: AsyncSession = Depends(db.get_session), ensureAdmin = Depends(ensure_admin)):
 
     http_response = None

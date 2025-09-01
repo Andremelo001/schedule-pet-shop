@@ -5,6 +5,10 @@ from typing import Dict, List
 
 from src.infra.db.settings.connection import DBConection
 
+#import dtos from documentation Swagger
+from src.modules.pet.dto.pet_dto import PetDTO, PetUpdateDTO
+
+
 #Import Adapters
 from src.main.adapters.request_adapter import request_adapter
 
@@ -27,7 +31,16 @@ router = APIRouter(
     tags=["Pets"],
 )
 
-@router.post("/create", response_model=Dict)
+@router.post("/create", response_model=Dict, openapi_extra={
+        "security": [{"BearerAuth": []}],
+        "requestBody": {
+            "content": {
+                "application/json": {
+                    "schema": PetDTO.model_json_schema()
+                }   
+            }
+        }
+    })
 async def create_pet(request: Request, session: AsyncSession = Depends(db.get_session), ensureClient = Depends(ensure_client)):
 
     http_response = None
@@ -39,7 +52,17 @@ async def create_pet(request: Request, session: AsyncSession = Depends(db.get_se
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
-@router.get("/get_all_pets", response_model=List[Dict])
+@router.get("/get_all_pets", response_model=List[Dict], openapi_extra={
+    "security": [{"BearerAuth": []}],
+    "parameters": [
+        {
+            "name": "cpf_client",
+            "in": "query",
+            "required": True,
+            "schema": {"type": "string"},
+        }
+    ]
+})
 async def list_pets(request: Request, session: AsyncSession = Depends(db.get_session), ensureClient = Depends(ensure_client)):
 
     http_response = None
@@ -51,7 +74,17 @@ async def list_pets(request: Request, session: AsyncSession = Depends(db.get_ses
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
-@router.get("/finder", response_model=Dict)
+@router.get("/finder", response_model=Dict, openapi_extra={
+    "security": [{"BearerAuth": []}],
+    "parameters": [
+        {
+            "name": "id_pet",
+            "in": "query",
+            "required": True,
+            "schema": {"type": "string"},
+        }
+    ]
+})
 async def finder_pet(request: Request, session: AsyncSession = Depends(db.get_session), ensureClient = Depends(ensure_client)):
 
     http_response = None
@@ -63,7 +96,17 @@ async def finder_pet(request: Request, session: AsyncSession = Depends(db.get_se
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
-@router.delete("/delete", response_model=Dict)
+@router.delete("/delete", response_model=Dict, openapi_extra={
+    "security": [{"BearerAuth": []}],
+    "parameters": [
+        {
+            "name": "id_pet",
+            "in": "query",
+            "required": True,
+            "schema": {"type": "string"},
+        }
+    ]
+})
 async def delete_pet(request: Request, session: AsyncSession = Depends(db.get_session), ensureClient = Depends(ensure_client)):
 
     http_response = None
@@ -75,7 +118,16 @@ async def delete_pet(request: Request, session: AsyncSession = Depends(db.get_se
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
-@router.put("/update", response_model=Dict)
+@router.put("/update", response_model=Dict, openapi_extra={
+        "security": [{"BearerAuth": []}],
+        "requestBody": {
+            "content": {
+                "application/json": {
+                    "schema": PetUpdateDTO.model_json_schema()
+                }   
+            }
+        }
+    })
 async def update_pet(request: Request, session: AsyncSession = Depends(db.get_session), ensureClient = Depends(ensure_client)):
 
     http_response = None

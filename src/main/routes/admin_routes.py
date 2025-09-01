@@ -5,6 +5,9 @@ from typing import Dict
 
 from src.infra.db.settings.connection import DBConection
 
+#import dtos from documentation Swagger
+from src.modules.authenticate_admin.dto.admin_dto import LoginRequest
+
 #Import Adapters
 from src.main.adapters.request_adapter import request_adapter
 
@@ -21,7 +24,15 @@ router = APIRouter(
     tags=["Admin"],
 )
 
-@router.post("/login", response_model=Dict)
+@router.post("/login", response_model=Dict, openapi_extra={
+        "requestBody": {
+            "content": {
+                "application/json": {
+                    "schema": LoginRequest.model_json_schema()
+                }   
+            }
+        }
+    })
 async def login_admin(request: Request, session: AsyncSession = Depends(db.get_session)):
 
     http_response = None

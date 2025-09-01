@@ -21,12 +21,6 @@ class ClientUpdateUseCase(InterfaceClientUpdate):
             await self.__client_exists(session, client.cpf, id_client)
 
             client.cpf = self.__format_cpf(client.cpf)
-            
-        if client.email is not None:
-            self.__validate_email(client.email)
-
-        if client.senha is not None:
-            self.__validate_senha(client.senha)
 
         new_client = await self.repository.update_client(session, id_client, client)
     
@@ -47,18 +41,6 @@ class ClientUpdateUseCase(InterfaceClientUpdate):
 
         if client and str(client.id) != id_client:
             raise HttpConflitError(f"Cliente com o cpf {cpf} já existe")
-
-    @classmethod
-    def __validate_email(cls, email: str) -> None:
-
-        if email is not None:
-            CreateClientUseCase.validate_email(email)
-
-    @classmethod
-    def __validate_senha(cls, senha: str) -> None:
-
-        if senha is not None:
-            CreateClientUseCase.validate_senha(senha)
         
     @classmethod
     def __format_cpf(cls, cpf) -> str:
