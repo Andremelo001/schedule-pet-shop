@@ -9,6 +9,7 @@ class ClientFinderController(ControllerInterface):
         self.use_case = use_case
 
     async def handle(self, session: AsyncSession, http_request: HttpRequest) -> HttpResponse:
+         
          cpf_client = http_request.query_params["cpf_client"]
 
          response = await self.use_case.find(session, cpf_client)
