@@ -5,7 +5,10 @@ from typing import Dict
 
 #import dtos from documentation Swagger
 from src.modules.user.dto.client_dto import ClientDTO, ClientUpdateDTO
-from src.modules.authenticate_user.dto.authenticate_user_dto import LoginRequest 
+
+from src.modules.authenticate_user.dto.authenticate_user_dto import LoginRequest
+
+from src.presentation.http_types.http_response import HttpResponse
 
 from src.infra.db.settings.connection import DBConection
 
@@ -19,9 +22,6 @@ from src.main.composers.client_composers.client_update_composer import client_up
 from src.main.composers.client_composers.client_delete_composer import client_delete_composer
 from src.main.composers.authenticate_user_composers.generate_token_composer import generate_token_composer
 from src.main.composers.client_composers.get_client_with_pets_and_schedules_composer import get_client_with_pets_and_schedules_composer
-
-#Import Error Handler
-from src.errors.error_handler import handle_errors
 
 #Import Middlewares
 from src.middlewares.ensureAuthenticated import ensure_admin
@@ -44,12 +44,7 @@ router = APIRouter(
     })
 async def create_client(request: Request, session: AsyncSession = Depends(db.get_session)):
 
-    http_response = None
-
-    try:
-        http_response = await request_adapter(request, session, client_create_composer)
-    except Exception as exception:
-        http_response = handle_errors(exception)
+    http_response: HttpResponse = await request_adapter(request, session, client_create_composer)
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
@@ -67,12 +62,8 @@ async def create_client(request: Request, session: AsyncSession = Depends(db.get
 })
 async def get_client(request: Request, session: AsyncSession = Depends(db.get_session), ensureAdmin = Depends(ensure_admin)):
 
-    http_response = None
 
-    try:
-        http_response = await request_adapter(request, session, client_finder_composer)
-    except Exception as exception:
-        http_response = handle_errors(exception)
+    http_response: HttpResponse = await request_adapter(request, session, client_finder_composer)
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
@@ -88,12 +79,7 @@ async def get_client(request: Request, session: AsyncSession = Depends(db.get_se
     })
 async def update_client(request: Request, session: AsyncSession = Depends(db.get_session), ensureAdmin = Depends(ensure_admin)):
 
-    http_response = None
-
-    try:
-        http_response = await request_adapter(request, session, client_update_composer)
-    except Exception as exception:
-        http_response = handle_errors(exception)
+    http_response: HttpResponse = await request_adapter(request, session, client_update_composer)
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
@@ -110,12 +96,7 @@ async def update_client(request: Request, session: AsyncSession = Depends(db.get
 })
 async def delete_client(request: Request, session: AsyncSession = Depends(db.get_session), ensureAdmin = Depends(ensure_admin)):
 
-    http_response = None
-
-    try:
-        http_response = await request_adapter(request, session, client_delete_composer)
-    except Exception as exception:
-        http_response = handle_errors(exception)
+    http_response: HttpResponse = await request_adapter(request, session, client_delete_composer)
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
@@ -130,12 +111,7 @@ async def delete_client(request: Request, session: AsyncSession = Depends(db.get
     })
 async def login_client(request: Request, session: AsyncSession = Depends(db.get_session)):
 
-    http_response = None
-
-    try:
-        http_response = await request_adapter(request, session, generate_token_composer)
-    except Exception as exception:
-        http_response = handle_errors(exception)
+    http_response: HttpResponse = await request_adapter(request, session, generate_token_composer)
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
@@ -152,12 +128,7 @@ async def login_client(request: Request, session: AsyncSession = Depends(db.get_
 })
 async def get_client_with_pets_and_schedules(request: Request, session: AsyncSession = Depends(db.get_session), ensureAdmin = Depends(ensure_admin)):
 
-    http_response = None
-
-    try:
-        http_response = await request_adapter(request, session, get_client_with_pets_and_schedules_composer)
-    except Exception as exception:
-        http_response = handle_errors(exception)
+    http_response: HttpResponse = await request_adapter(request, session, get_client_with_pets_and_schedules_composer)
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 

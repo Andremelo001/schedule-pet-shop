@@ -8,6 +8,8 @@ from src.infra.db.settings.connection import DBConection
 #import dtos from documentation Swagger
 from src.modules.schedule.dto.schedule_dto import ScheduleDTO
 
+from src.presentation.http_types.http_response import HttpResponse
+
 #Import Adapters
 from src.main.adapters.request_adapter import request_adapter
 
@@ -18,9 +20,6 @@ from src.main.composers.schedule_composers.cancel_schedule_composer import cance
 from src.main.composers.schedule_composers.schedule_delete_composer import schedule_delete_composer
 from src.main.composers.schedule_composers.schedule_list_composer import schedule_list_composer
 from src.main.composers.schedule_composers.find_schedules_actives_composer import find_schedules_actives_composer
-
-#Import Error Handler
-from src.errors.error_handler import handle_errors
 
 #Import Middlewares
 from src.middlewares.ensureAuthenticated import ensure_client, ensure_delete_schedule, ensure_admin
@@ -44,12 +43,7 @@ router = APIRouter(
     })
 async def create_schedule(request: Request, session: AsyncSession = Depends(db.get_session), ensureClient = Depends(ensure_client)):
 
-    http_response = None
-
-    try:
-        http_response = await request_adapter(request, session, schedule_create_composer)
-    except Exception as exception:
-        http_response = handle_errors(exception)
+    http_response: HttpResponse = await request_adapter(request, session, schedule_create_composer)
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
@@ -66,12 +60,7 @@ async def create_schedule(request: Request, session: AsyncSession = Depends(db.g
 })
 async def request_cancel(request: Request, session: AsyncSession = Depends(db.get_session), ensureClient = Depends(ensure_client)):
 
-    http_response = None
-
-    try:
-        http_response = await request_adapter(request, session, request_cancel_schedule)
-    except Exception as exception:
-        http_response = handle_errors(exception)
+    http_response: HttpResponse = await request_adapter(request, session, request_cancel_schedule)
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
@@ -88,12 +77,7 @@ async def request_cancel(request: Request, session: AsyncSession = Depends(db.ge
 })
 async def cancel(request: Request, session: AsyncSession = Depends(db.get_session), ensureDeleteSchedule = Depends(ensure_delete_schedule)):
 
-    http_response = None
-
-    try:
-        http_response = await request_adapter(request, session, cancel_schedule)
-    except Exception as exception:
-        http_response = handle_errors(exception)
+    http_response: HttpResponse = await request_adapter(request, session, cancel_schedule)
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
@@ -110,12 +94,7 @@ async def cancel(request: Request, session: AsyncSession = Depends(db.get_sessio
 })
 async def delete(request: Request, session: AsyncSession = Depends(db.get_session), ensureAdmin = Depends(ensure_admin)):
 
-    http_response = None
-
-    try:
-        http_response = await request_adapter(request, session, schedule_delete_composer)
-    except Exception as exception:
-        http_response = handle_errors(exception)
+    http_response: HttpResponse = await request_adapter(request, session, schedule_delete_composer)
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
@@ -124,12 +103,7 @@ async def delete(request: Request, session: AsyncSession = Depends(db.get_sessio
 })
 async def list(request: Request, session: AsyncSession = Depends(db.get_session), ensureAdmin = Depends(ensure_admin)):
 
-    http_response = None
-
-    try:
-        http_response = await request_adapter(request, session, schedule_list_composer)
-    except Exception as exception:
-        http_response = handle_errors(exception)
+    http_response: HttpResponse = await request_adapter(request, session, schedule_list_composer)
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
@@ -138,11 +112,6 @@ async def list(request: Request, session: AsyncSession = Depends(db.get_session)
 })
 async def list_schedules_actives(request: Request, session: AsyncSession = Depends(db.get_session), ensureAdmin = Depends(ensure_admin)):
 
-    http_response = None
-
-    try:
-        http_response = await request_adapter(request, session, find_schedules_actives_composer)
-    except Exception as exception:
-        http_response = handle_errors(exception)
+    http_response: HttpResponse = await request_adapter(request, session, find_schedules_actives_composer)
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)

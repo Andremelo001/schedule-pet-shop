@@ -8,6 +8,7 @@ from src.infra.db.settings.connection import DBConection
 #import dtos from documentation Swagger
 from src.modules.pet.dto.pet_dto import PetDTO, PetUpdateDTO
 
+from src.presentation.http_types.http_response import HttpResponse
 
 #Import Adapters
 from src.main.adapters.request_adapter import request_adapter
@@ -17,9 +18,6 @@ from src.main.composers.pet_composers.pet_delete_composer import pet_delete_comp
 from src.main.composers.pet_composers.get_all_pets_composer import get_all_pets_composer
 from src.main.composers.pet_composers.pet_finder_composer import pet_finder_composer
 from src.main.composers.pet_composers.pet_update_composer import pet_update_composer
-
-#Import Error Handler
-from src.errors.error_handler import handle_errors
 
 #Import Middlewares
 from src.middlewares.ensureAuthenticated import ensure_client
@@ -43,12 +41,7 @@ router = APIRouter(
     })
 async def create_pet(request: Request, session: AsyncSession = Depends(db.get_session), ensureClient = Depends(ensure_client)):
 
-    http_response = None
-
-    try:
-        http_response = await request_adapter(request, session, pet_create_composer)
-    except Exception as exception:
-        http_response = handle_errors(exception)
+    http_response: HttpResponse = await request_adapter(request, session, pet_create_composer)
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
@@ -65,12 +58,7 @@ async def create_pet(request: Request, session: AsyncSession = Depends(db.get_se
 })
 async def list_pets(request: Request, session: AsyncSession = Depends(db.get_session), ensureClient = Depends(ensure_client)):
 
-    http_response = None
-
-    try:
-        http_response = await request_adapter(request, session, get_all_pets_composer)
-    except Exception as exception:
-        http_response = handle_errors(exception)
+    http_response: HttpResponse = await request_adapter(request, session, get_all_pets_composer)
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
@@ -87,12 +75,7 @@ async def list_pets(request: Request, session: AsyncSession = Depends(db.get_ses
 })
 async def finder_pet(request: Request, session: AsyncSession = Depends(db.get_session), ensureClient = Depends(ensure_client)):
 
-    http_response = None
-
-    try:
-        http_response = await request_adapter(request, session, pet_finder_composer)
-    except Exception as exception:
-        http_response = handle_errors(exception)
+    http_response: HttpResponse = await request_adapter(request, session, pet_finder_composer)
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
@@ -109,12 +92,7 @@ async def finder_pet(request: Request, session: AsyncSession = Depends(db.get_se
 })
 async def delete_pet(request: Request, session: AsyncSession = Depends(db.get_session), ensureClient = Depends(ensure_client)):
 
-    http_response = None
-
-    try:
-        http_response = await request_adapter(request, session, pet_delete_composer)
-    except Exception as exception:
-        http_response = handle_errors(exception)
+    http_response: HttpResponse = await request_adapter(request, session, pet_delete_composer)
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
@@ -130,11 +108,6 @@ async def delete_pet(request: Request, session: AsyncSession = Depends(db.get_se
     })
 async def update_pet(request: Request, session: AsyncSession = Depends(db.get_session), ensureClient = Depends(ensure_client)):
 
-    http_response = None
-
-    try:
-        http_response = await request_adapter(request, session, pet_update_composer)
-    except Exception as exception:
-        http_response = handle_errors(exception)
+    http_response: HttpResponse = await request_adapter(request, session, pet_update_composer)
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)

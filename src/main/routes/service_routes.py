@@ -8,6 +8,8 @@ from src.infra.db.settings.connection import DBConection
 #import dtos from documentation Swagger
 from src.modules.service_types.dto.service_dto import ServiceDTO, UpdateServiceDTO
 
+from src.presentation.http_types.http_response import HttpResponse
+
 #Import Adapters
 from src.main.adapters.request_adapter import request_adapter
 
@@ -16,9 +18,6 @@ from src.main.composers.service_composers.service_create_composer import service
 from src.main.composers.service_composers.service_list_composer import service_list_composer
 from src.main.composers.service_composers.service_delete_composer import service_delete_composer
 from src.main.composers.service_composers.service_update_composer import service_update_composer
-
-#Import Error Handler
-from src.errors.error_handler import handle_errors
 
 #Import Middlewares
 from src.middlewares.ensureAuthenticated import ensure_admin
@@ -42,12 +41,7 @@ router = APIRouter(
     })
 async def create_service(request: Request, session: AsyncSession = Depends(db.get_session), ensureAdmin = Depends(ensure_admin)):
 
-    http_response = None
-
-    try:
-        http_response = await request_adapter(request, session, service_create_composer)
-    except Exception as exception:
-        http_response = handle_errors(exception)
+    http_response: HttpResponse = await request_adapter(request, session, service_create_composer)
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
@@ -56,12 +50,7 @@ async def create_service(request: Request, session: AsyncSession = Depends(db.ge
     })
 async def create_service(request: Request, session: AsyncSession = Depends(db.get_session), ensureAdmin = Depends(ensure_admin)):
 
-    http_response = None
-
-    try:
-        http_response = await request_adapter(request, session, service_list_composer)
-    except Exception as exception:
-        http_response = handle_errors(exception)
+    http_response: HttpResponse = await request_adapter(request, session, service_list_composer)
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
@@ -78,12 +67,7 @@ async def create_service(request: Request, session: AsyncSession = Depends(db.ge
 })
 async def delete_service(request: Request, session: AsyncSession = Depends(db.get_session), ensureAdmin = Depends(ensure_admin)):
 
-    http_response = None
-
-    try:
-        http_response = await request_adapter(request, session, service_delete_composer)
-    except Exception as exception:
-        http_response = handle_errors(exception)
+    http_response: HttpResponse = await request_adapter(request, session, service_delete_composer)
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
@@ -99,11 +83,6 @@ async def delete_service(request: Request, session: AsyncSession = Depends(db.ge
     })
 async def update_service(request: Request, session: AsyncSession = Depends(db.get_session), ensureAdmin = Depends(ensure_admin)):
 
-    http_response = None
-
-    try:
-        http_response = await request_adapter(request, session, service_update_composer)
-    except Exception as exception:
-        http_response = handle_errors(exception)
+    http_response: HttpResponse = await request_adapter(request, session, service_update_composer)
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
