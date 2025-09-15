@@ -1,5 +1,4 @@
 from sqlmodel import SQLModel
-from typing import Optional
 from typing import List
 from datetime import date, time
 

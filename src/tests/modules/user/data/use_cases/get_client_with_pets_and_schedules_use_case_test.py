@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, MagicMock
 from datetime import date, time
 from src.modules.user.data.use_cases.get_client_with_pets_and_schedules_use_case import GetClientWithPetsAndSchedulesUseCase
 from src.errors.types_errors import HttpNotFoundError
-from src.infra.db.entities.client import Client, ClientWithPetsWithSchedules
+from src.infra.db.entities.client import Client
 
 @pytest.mark.asyncio
 async def test_get_client_with_pets_and_schedules_success(mocker):

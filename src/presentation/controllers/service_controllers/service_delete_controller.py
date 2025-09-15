@@ -3,7 +3,6 @@ from src.modules.service_types.domain.use_cases.interface_service_delete import 
 from src.presentation.interfaces.controller_interface import ControllerInterface
 from src.presentation.http_types.http_request import HttpRequest
 from src.presentation.http_types.http_response import HttpResponse
-from src.modules.service_types.dto.service_dto import ServiceDTO
 
 class ServiceDeleteController(ControllerInterface):
     def __init__(self, use_case: InterfaceServiceDelete):

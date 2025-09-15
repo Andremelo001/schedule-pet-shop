@@ -6,8 +6,8 @@ from src.infra.db.entities.services import Services
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from src.infra.db.entities.client import Client, ClientBase
-    from src.infra.db.entities.pet import Pet, PetBase
+    from src.infra.db.entities.client import Client 
+    from src.infra.db.entities.pet import Pet
     
 
 

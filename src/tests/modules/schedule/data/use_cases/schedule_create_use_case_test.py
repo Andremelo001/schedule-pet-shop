@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock
-from datetime import datetime, time, date, timedelta
+from datetime import datetime, time, date
 
 from src.modules.schedule.data.use_cases.schedule_create_use_case import ScheduleCreateUseCase
 from src.modules.schedule.dto.schedule_dto import ScheduleDTO

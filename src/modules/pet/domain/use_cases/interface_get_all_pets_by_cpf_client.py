@@ -2,8 +2,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from abc import ABC, abstractmethod
 from typing import List, Dict
 
-from src.modules.pet.domain.models.pet import Pet
-
 class InterfaceGetAllPetsByCpfClient(ABC):
 
     @abstractmethod

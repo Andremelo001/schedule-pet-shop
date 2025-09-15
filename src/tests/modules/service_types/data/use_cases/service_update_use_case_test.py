@@ -2,7 +2,6 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock
 
 from src.modules.service_types.data.use_cases.service_update_use_case import ServiceUpdateUseCase
-from src.modules.service_types.dto.service_dto import UpdateServiceDTO
 from src.errors.types_errors.http_not_found import HttpNotFoundError
 from src.errors.types_errors.http_Unauthorized import HttpUnauthorized
 

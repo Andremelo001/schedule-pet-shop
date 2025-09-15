@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import Dict
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,7 +11,7 @@ class ServiceDeleteUseCase(InterfaceServiceDelete):
     def __init__(self, repository: InterfaceServiceRepository):
         self.repository = repository
     
-    async def delete(self, session: AsyncSession, id_service: str) -> None:
+    async def delete(self, session: AsyncSession, id_service: str) -> Dict:
 
         await self.__service_not_found(session, id_service)
 

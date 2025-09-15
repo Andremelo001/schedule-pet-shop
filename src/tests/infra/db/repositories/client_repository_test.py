@@ -129,7 +129,6 @@ async def test_get_client_by_email(mocker):
 @pytest.mark.asyncio
 async def test_get_client_with_pets_and_schedules_by_id(mocker):
     from src.infra.db.entities.client import ClientWithPetsWithSchedules
-    from uuid import UUID
     
     fake_id = "69bde4f5-c54f-47d0-9c65-ea9d3dbd0eef"
     fake_client = ClientWithPetsWithSchedules(id=fake_id, name="Andre", cpf="088550540383", age=20, email="de@gmail.com", senha="de2019")

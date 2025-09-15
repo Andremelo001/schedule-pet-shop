@@ -3,7 +3,6 @@ from datetime import datetime, time, timedelta, date
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.modules.schedule.dto.schedule_dto import ScheduleDTO
-from src.modules.schedule.domain.models.schedule import Schedule
 
 from src.errors.error_handler import HttpUnauthorized
 

@@ -48,7 +48,7 @@ async def create_service(request: Request, session: AsyncSession = Depends(db.ge
 @router.get("/list", response_model=Dict, openapi_extra={
         "security": [{"BearerAuth": []}]
     })
-async def create_service(request: Request, session: AsyncSession = Depends(db.get_session), ensureAdmin = Depends(ensure_admin)):
+async def list_service(request: Request, session: AsyncSession = Depends(db.get_session), ensureAdmin = Depends(ensure_admin)):
 
     http_response: HttpResponse = await request_adapter(request, session, service_list_composer)
 

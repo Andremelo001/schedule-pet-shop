@@ -6,7 +6,6 @@ from sqlalchemy.orm import selectinload
 from typing import List
 
 from src.infra.db.entities.client import Client as ClientEntitie, ClientWithPetsWithSchedules
-from src.infra.db.entities.pet import Pet
 from src.infra.db.entities.schedule import Schedule
 
 from src.modules.user.data.interfaces.interface_client_repository import InterfaceClientRepository
