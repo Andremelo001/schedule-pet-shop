@@ -20,7 +20,8 @@ async def test_create_service(mocker):
     with mocker.patch('src.infra.db.repositories.service_repository.ServicesEntitie', return_value=mock_service_entity):
         mock_session = AsyncMock()
 
-        await ServiceRepository.create_service(mock_session, fake_service)
+        repository = ServiceRepository(mock_session)
+        await repository.create_service(fake_service)
 
         assert mock_session.add.called
         assert mock_session.commit.called
@@ -45,7 +46,8 @@ async def test_find_service_by_id(mocker):
     mock_session = AsyncMock()
     mock_session.execute.return_value = mock_result
 
-    service = await ServiceRepository.find_service_by_id(mock_session, fake_id)
+    repository = ServiceRepository(mock_session)
+    service = await repository.find_service_by_id(fake_id)
 
     assert service.id == fake_id
     assert service.type_service == "Banho e Tosa"
@@ -69,7 +71,8 @@ async def test_list_services(mocker):
     mock_session = AsyncMock()
     mock_session.execute.return_value = mock_result
 
-    services = await ServiceRepository.list_services(mock_session)
+    repository = ServiceRepository(mock_session)
+    services = await repository.list_services()
 
     assert len(services) == 2
     assert services[0].type_service == "Banho e Tosa"
@@ -97,8 +100,8 @@ async def test_update_service(mocker):
     mock_session = AsyncMock()
     mock_session.execute.return_value = mock_result
 
-    repository = ServiceRepository()
-    updated_service = await repository.update_service(mock_session, update_data, fake_id)
+    repository = ServiceRepository(mock_session)
+    updated_service = await repository.update_service(update_data, fake_id)
 
     assert mock_session.commit.called
     assert mock_session.refresh.called
@@ -118,8 +121,8 @@ async def test_delete_service(mocker):
     mock_session = AsyncMock()
     mock_session.execute.return_value = mock_result
 
-    repository = ServiceRepository()
-    await repository.delete_service(mock_session, fake_id)
+    repository = ServiceRepository(mock_session)
+    await repository.delete_service(fake_id)
 
     assert mock_session.execute.called
     assert mock_session.delete.called
@@ -143,8 +146,8 @@ async def test_get_schedules_by_service_id(mocker):
     mock_session = AsyncMock()
     mock_session.execute.return_value = mock_result
 
-    repository = ServiceRepository()
-    schedules = await repository.get_schedules_by_service_id(mock_session, fake_service_id)
+    repository = ServiceRepository(mock_session)
+    schedules = await repository.get_schedules_by_service_id(fake_service_id)
 
     assert len(schedules) == 2
     assert schedules[0].id == "schedule1"

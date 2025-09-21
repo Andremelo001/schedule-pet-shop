@@ -40,7 +40,8 @@ async def test_create_schedule(mocker):
             # Configura os retornos para as consultas de serviços
             mock_session.execute.side_effect = [mock_service_result_1, mock_service_result_2]
 
-            await ScheduleRepository.create_schedule(mock_session, fake_schedule)
+            repository = ScheduleRepository(mock_session)
+            await repository.create_schedule(fake_schedule)
 
             # Verifica se as operações de persistência foram chamadas
             assert mock_session.add.call_count >= 3  # schedule + 2 associations
@@ -58,7 +59,8 @@ async def test_find_email_client_by_id_schedule(mocker):
     mock_session = AsyncMock()
     mock_session.execute.return_value = mock_result
 
-    email = await ScheduleRepository.find_email_client_by_id_schedule(mock_session, fake_schedule_id)
+    repository = ScheduleRepository(mock_session)
+    email = await repository.find_email_client_by_id_schedule(fake_schedule_id)
 
     assert email == fake_email
     mock_session.execute.assert_called_once()
@@ -75,7 +77,8 @@ async def test_find_schedule_by_id(mocker):
     mock_session = AsyncMock()
     mock_session.execute.return_value = mock_result
 
-    schedule = await ScheduleRepository.find_schedule_by_id(mock_session, fake_id)
+    repository = ScheduleRepository(mock_session)
+    schedule = await repository.find_schedule_by_id(fake_id)
 
     assert schedule.id == fake_id
     mock_session.execute.assert_called_once()
@@ -96,7 +99,13 @@ async def test_list_schedules(mocker):
     mock_session = AsyncMock()
     mock_session.execute.return_value = mock_result
 
-    schedules = await ScheduleRepository.list_schedules(mock_session)
+    repository = ScheduleRepository(mock_session)
+    schedules = await repository.list_schedules()
+
+    assert len(schedules) == 2
+    assert schedules[0].id == "schedule-1"
+    assert schedules[1].id == "schedule-2"
+    mock_session.execute.assert_called_once()
 
     assert len(schedules) == 2
     assert schedules[0].id == "schedule-1"
@@ -120,7 +129,8 @@ async def test_find_schedule_by_id_client(mocker):
     mock_session = AsyncMock()
     mock_session.execute.return_value = mock_result
 
-    schedules = await ScheduleRepository.find_schedule_by_id_client(mock_session, fake_client_id)
+    repository = ScheduleRepository(mock_session)
+    schedules = await repository.find_schedule_by_id_client(fake_client_id)
 
     assert len(schedules) == 2
     assert all(schedule.client_id == fake_client_id for schedule in schedules)
@@ -139,7 +149,8 @@ async def test_cancel_schedule(mocker):
     mock_session = AsyncMock()
     mock_session.execute.return_value = mock_result
 
-    await ScheduleRepository.cancel_schedule(mock_session, fake_schedule_id)
+    repository = ScheduleRepository(mock_session)
+    await repository.cancel_schedule(fake_schedule_id)
 
     assert fake_schedule.schedule_active == False
     assert mock_session.add.called
@@ -164,7 +175,8 @@ async def test_find_schedules_available(mocker):
     mock_session = AsyncMock()
     mock_session.execute.return_value = mock_result
 
-    schedules = await ScheduleRepository.find_schedules_available(mock_session)
+    repository = ScheduleRepository(mock_session)
+    schedules = await repository.find_schedules_available()
 
     assert len(schedules) == 2
     assert all(schedule.schedule_active == True for schedule in schedules)
@@ -182,7 +194,8 @@ async def test_delete_schedule(mocker):
     mock_session = AsyncMock()
     mock_session.execute.return_value = mock_result
 
-    await ScheduleRepository.delete_schedule(mock_session, fake_schedule_id)
+    repository = ScheduleRepository(mock_session)
+    await repository.delete_schedule(fake_schedule_id)
 
     assert mock_session.execute.called
     assert mock_session.delete.called
@@ -208,7 +221,8 @@ async def test_duration_services_in_schedule(mocker):
     mock_session = AsyncMock()
     mock_session.execute.side_effect = [mock_service_result_1, mock_service_result_2]
 
-    total_duration = await ScheduleRepository.duration_services_in_schedule(mock_session, fake_service_ids)
+    repository = ScheduleRepository(mock_session)
+    total_duration = await repository.duration_services_in_schedule(fake_service_ids)
 
     assert total_duration == 90  # 60 + 30
     assert mock_session.execute.call_count == 2
@@ -224,7 +238,8 @@ async def test_get_service_ids_from_schedule(mocker):
     mock_session = AsyncMock()
     mock_session.execute.return_value = mock_result
 
-    service_ids = await ScheduleRepository.get_service_ids_from_schedule(mock_session, fake_schedule_id)
+    repository = ScheduleRepository(mock_session)
+    service_ids = await repository.get_service_ids_from_schedule(fake_schedule_id)
 
     assert len(service_ids) == 2
     assert service_ids == ["service-id-1", "service-id-2"]
@@ -249,7 +264,8 @@ async def test_find_schedules_by_date(mocker):
     mock_session = AsyncMock()
     mock_session.execute.return_value = mock_result
 
-    schedules = await ScheduleRepository.find_schedules_by_date(mock_session, fake_date)
+    repository = ScheduleRepository(mock_session)
+    schedules = await repository.find_schedules_by_date(fake_date)
 
     assert len(schedules) == 2
     assert all(schedule.date_schedule == fake_date for schedule in schedules)

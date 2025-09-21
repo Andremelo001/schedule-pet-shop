@@ -16,7 +16,8 @@ async def test_get_admin_by_user(mocker):
     mock_session = AsyncMock()
     mock_session.execute.return_value = mock_result
 
-    admin = await AdminRepository.get_admin_by_user(mock_session, fake_user)
+    repository = AdminRepository(mock_session)
+    admin = await repository.get_admin_by_user(fake_user)
 
     assert admin.user == fake_user
     mock_session.execute.assert_called_once()

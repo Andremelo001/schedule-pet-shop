@@ -17,7 +17,8 @@ async def test_create_pet(mocker):
 
     mock_session = AsyncMock()
 
-    await PetRepository.create_pet(mock_session, fake_client_id, fake_pet)
+    repository = PetRepository(mock_session)
+    await repository.create_pet(fake_client_id, fake_pet)
 
     assert mock_session.add.called
     assert mock_session.commit.called
@@ -42,7 +43,8 @@ async def test_delete_pet(mocker):
     mock_session = AsyncMock()
     mock_session.execute.return_value = mock_result
 
-    await PetRepository.delete_pet(mock_session, fake_id)
+    repository = PetRepository(mock_session)
+    await repository.delete_pet(fake_id)
 
     assert mock_session.execute.called
     assert mock_session.delete.called
@@ -66,7 +68,8 @@ async def test_uptdate_pet(mocker):
     mock_session = AsyncMock()
     mock_session.execute.return_value = mock_result
 
-    updated_pet = await PetRepository.uptdate_pet(mock_session, fake_id, update_data)
+    repository = PetRepository(mock_session)
+    updated_pet = await repository.uptdate_pet(fake_id, update_data)
 
     assert mock_session.commit.called
     assert mock_session.refresh.called
@@ -86,7 +89,8 @@ async def test_get_pet(mocker):
     mock_session = AsyncMock()
     mock_session.execute.return_value = mock_result
 
-    pet = await PetRepository.get_pet(mock_session, fake_id)
+    repository = PetRepository(mock_session)
+    pet = await repository.get_pet(fake_id)
 
     assert pet.id == fake_id
     mock_session.execute.assert_called_once()
@@ -102,7 +106,8 @@ async def test_get_all_pets_by_cpf_client(mocker):
     mock_session = AsyncMock()
     mock_session.execute.return_value = mock_result
 
-    pets = await PetRepository.get_all_pets_by_cpf_client(mock_session, fake_cpf)
+    repository = PetRepository(mock_session)
+    pets = await repository.get_all_pets_by_cpf_client(fake_cpf)
 
     assert len(pets) == 2
     assert pets[0].name == "Rex"
@@ -120,7 +125,8 @@ async def test_get_name_pet_by_id_client(mocker):
     mock_session = AsyncMock()
     mock_session.execute.return_value = mock_result
 
-    names = await PetRepository.get_name_pet_by_id_client(mock_session, fake_client_id)
+    repository = PetRepository(mock_session)
+    names = await repository.get_name_pet_by_id_client(fake_client_id)
 
     assert len(names) == 3
     assert names == ["Rex", "Max", "Luna"]
