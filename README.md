@@ -146,8 +146,6 @@ src/
 - **Docker** e **Docker Compose**
 - **Git**
 
-> **⚠️ Importante**: Certifique-se de criar o arquivo `.env` com as configurações corretas antes de executar a aplicação. Veja a seção [Configuração](#%EF%B8%8F-configuração) para mais detalhes.
-
 ## 🚀 Instalação
 
 ### 🐳 Opção 1: Instalação com Docker (Recomendada)
@@ -174,7 +172,7 @@ docker-compose up -d --build
 #### 4. Execute as migrations (primeira vez)
 ```bash
 # Execute as migrations para criar as tabelas
-docker-compose exec app alembic upgrade head
+docker-compose exec app uv run alembic upgrade head
 ```
 
 A API estará disponível em: `http://localhost:8000`
@@ -274,14 +272,13 @@ A documentação da API estará em: `http://localhost:8000/docs`
 Crie um arquivo `.env` na raiz do projeto:
 
 ```env
-# Banco de Dados PostgreSQL (usado pelo Docker)
 POSTGRES_DB=db_petshop
 POSTGRES_USER=petshop
 POSTGRES_PASSWORD=sua_senha_segura
 POSTGRES_PORT=5432
 
-# URL de Conexão (usada pela aplicação)
 DATABASE_URL="postgresql+asyncpg://petshop:sua_senha_segura@db:5432/db_petshop"
+DATABASE_URL_DOCKER="postgresql+asyncpg://petshop:sua_senha_segura@db:5432/db_petshop"
 
 # JWT
 JWT_SECRET=your-super-secret-jwt-key-muito-segura
@@ -297,6 +294,7 @@ EMAIL_PORT="587"
 EMAIL_USERNAME="seu_email"
 EMAIL_PASSWORD="senha_email"
 ```
+
 > **🔒 Segurança**: 
 > - Nunca commite o arquivo `.env` no repositório
 > - Use senhas fortes e únicas
