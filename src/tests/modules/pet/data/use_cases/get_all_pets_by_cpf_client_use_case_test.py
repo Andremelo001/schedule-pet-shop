@@ -8,7 +8,6 @@ from src.errors.types_errors.http_not_found import HttpNotFoundError
 @pytest.mark.asyncio
 async def test_get_all_pets_by_cpf_client_success(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock pets exist
     mock_pet_1 = MagicMock()
@@ -30,7 +29,7 @@ async def test_get_all_pets_by_cpf_client_success(mocker):
     mock_repository.get_all_pets_by_cpf_client.return_value = [mock_pet_1, mock_pet_2]
 
     use_case = GetAllPetsByCpfClientUseCase(mock_repository)
-    result = await use_case.get_all_pets(mock_session, "08855040383")
+    result = await use_case.get_all_pets( "12345678909")
 
     assert len(result) == 2
     
@@ -50,13 +49,12 @@ async def test_get_all_pets_by_cpf_client_success(mocker):
     assert result[1]["size_in_centimeters"] == 55
     assert result[1]["client_id"] == "client-id-123"
 
-    mock_repository.get_all_pets_by_cpf_client.assert_called_once_with(mock_session, "08855040383")
+    mock_repository.get_all_pets_by_cpf_client.assert_called_once_with( "12345678909")
 
 
 @pytest.mark.asyncio
 async def test_get_all_pets_by_cpf_client_not_found(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock no pets found
     mock_repository.get_all_pets_by_cpf_client.return_value = []
@@ -64,15 +62,14 @@ async def test_get_all_pets_by_cpf_client_not_found(mocker):
     use_case = GetAllPetsByCpfClientUseCase(mock_repository)
 
     with pytest.raises(HttpNotFoundError, match="Pets do cliente não encontrados"):
-        await use_case.get_all_pets(mock_session, "08855040383")
+        await use_case.get_all_pets( "12345678909")
 
-    mock_repository.get_all_pets_by_cpf_client.assert_called_once_with(mock_session, "08855040383")
+    mock_repository.get_all_pets_by_cpf_client.assert_called_once_with( "12345678909")
 
 
 @pytest.mark.asyncio
 async def test_get_all_pets_by_cpf_client_single_pet(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock single pet
     mock_pet = MagicMock()
@@ -86,7 +83,7 @@ async def test_get_all_pets_by_cpf_client_single_pet(mocker):
     mock_repository.get_all_pets_by_cpf_client.return_value = [mock_pet]
 
     use_case = GetAllPetsByCpfClientUseCase(mock_repository)
-    result = await use_case.get_all_pets(mock_session, "08855040383")
+    result = await use_case.get_all_pets( "12345678909")
 
     assert len(result) == 1
     assert result[0]["id"] == "pet-id-1"
@@ -96,4 +93,4 @@ async def test_get_all_pets_by_cpf_client_single_pet(mocker):
     assert result[0]["size_in_centimeters"] == 60
     assert result[0]["client_id"] == "client-id-123"
 
-    mock_repository.get_all_pets_by_cpf_client.assert_called_once_with(mock_session, "08855040383")
+    mock_repository.get_all_pets_by_cpf_client.assert_called_once_with( "12345678909")

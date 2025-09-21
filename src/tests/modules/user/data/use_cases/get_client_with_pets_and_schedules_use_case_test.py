@@ -8,7 +8,6 @@ from src.infra.db.entities.client import Client
 @pytest.mark.asyncio
 async def test_get_client_with_pets_and_schedules_success(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock client exists
     fake_client = Client(id="client-id-123")
@@ -48,7 +47,7 @@ async def test_get_client_with_pets_and_schedules_success(mocker):
     mock_client_with_data = MagicMock()
     mock_client_with_data.id = "client-id-123"
     mock_client_with_data.name = "Andre"
-    mock_client_with_data.cpf = "08855040383"
+    mock_client_with_data.cpf = "12345678909"
     mock_client_with_data.age = 25
     mock_client_with_data.email = "andre@gmail.com"
     mock_client_with_data.senha = "senha123"
@@ -59,12 +58,12 @@ async def test_get_client_with_pets_and_schedules_success(mocker):
 
     use_case = GetClientWithPetsAndSchedulesUseCase(mock_repository)
 
-    result = await use_case.get_client_with_pets_and_schedules(mock_session, "client-id-123")
+    result = await use_case.get_client_with_pets_and_schedules( "client-id-123")
 
     # Verify client data
     assert result["id"] == "client-id-123"
     assert result["name"] == "Andre"
-    assert result["cpf"] == "08855040383"
+    assert result["cpf"] == "12345678909"
     assert result["age"] == 25
     assert result["email"] == "andre@gmail.com"
 
@@ -90,13 +89,12 @@ async def test_get_client_with_pets_and_schedules_success(mocker):
 
     assert result["schedules"][1]["schedule_active"] == False
 
-    mock_repository.get_client_by_id.assert_called_once_with(mock_session, "client-id-123")
-    mock_repository.get_client_with_pets_and_schedules_by_id.assert_called_once_with(mock_session, "client-id-123")
+    mock_repository.get_client_by_id.assert_called_once_with( "client-id-123")
+    mock_repository.get_client_with_pets_and_schedules_by_id.assert_called_once_with( "client-id-123")
 
 @pytest.mark.asyncio
 async def test_get_client_with_pets_and_schedules_not_found(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock client does not exist
     mock_repository.get_client_by_id.return_value = None
@@ -104,15 +102,14 @@ async def test_get_client_with_pets_and_schedules_not_found(mocker):
     use_case = GetClientWithPetsAndSchedulesUseCase(mock_repository)
 
     with pytest.raises(HttpNotFoundError) as exc_info:
-        await use_case.get_client_with_pets_and_schedules(mock_session, "client-id-123")
+        await use_case.get_client_with_pets_and_schedules( "client-id-123")
 
     assert "Cliente com o id client-id-123 não encontrado" in str(exc_info.value)
-    mock_repository.get_client_by_id.assert_called_once_with(mock_session, "client-id-123")
+    mock_repository.get_client_by_id.assert_called_once_with( "client-id-123")
 
 @pytest.mark.asyncio
 async def test_get_client_with_empty_pets_and_schedules(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock client exists
     fake_client = Client(id="client-id-123")
@@ -122,7 +119,7 @@ async def test_get_client_with_empty_pets_and_schedules(mocker):
     mock_client_with_data = MagicMock()
     mock_client_with_data.id = "client-id-123"
     mock_client_with_data.name = "Andre"
-    mock_client_with_data.cpf = "08855040383"
+    mock_client_with_data.cpf = "12345678909"
     mock_client_with_data.age = 25
     mock_client_with_data.email = "andre@gmail.com"
     mock_client_with_data.senha = "senha123"
@@ -133,12 +130,12 @@ async def test_get_client_with_empty_pets_and_schedules(mocker):
 
     use_case = GetClientWithPetsAndSchedulesUseCase(mock_repository)
 
-    result = await use_case.get_client_with_pets_and_schedules(mock_session, "client-id-123")
+    result = await use_case.get_client_with_pets_and_schedules( "client-id-123")
 
     assert result["id"] == "client-id-123"
     assert result["name"] == "Andre"
     assert len(result["pets"]) == 0
     assert len(result["schedules"]) == 0
 
-    mock_repository.get_client_by_id.assert_called_once_with(mock_session, "client-id-123")
-    mock_repository.get_client_with_pets_and_schedules_by_id.assert_called_once_with(mock_session, "client-id-123")
+    mock_repository.get_client_by_id.assert_called_once_with( "client-id-123")
+    mock_repository.get_client_with_pets_and_schedules_by_id.assert_called_once_with( "client-id-123")

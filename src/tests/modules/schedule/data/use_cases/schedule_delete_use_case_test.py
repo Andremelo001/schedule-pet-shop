@@ -10,7 +10,6 @@ from src.errors.types_errors.http_Unauthorized import HttpUnauthorized
 @pytest.mark.asyncio
 async def test_delete_schedule_success(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock schedule exists and date has passed
     fake_schedule = MagicMock()
@@ -24,20 +23,19 @@ async def test_delete_schedule_success(mocker):
         mock_date.side_effect = lambda *args, **kw: date(*args, **kw)
 
         use_case = ScheduleDeleteUseCase(mock_repository)
-        result = await use_case.delete(mock_session, "schedule-id-123")
+        result = await use_case.delete( "schedule-id-123")
 
         assert result["message"] == "Agendamento deletado com sucesso"
 
         # Verify that find_schedule_by_id was called twice (once for validation, once for date check)
         assert mock_repository.find_schedule_by_id.call_count == 2
-        mock_repository.find_schedule_by_id.assert_any_call(mock_session, "schedule-id-123")
-        mock_repository.delete_schedule.assert_called_once_with(mock_session, "schedule-id-123")
+        mock_repository.find_schedule_by_id.assert_any_call("schedule-id-123")
+        mock_repository.delete_schedule.assert_called_once_with("schedule-id-123")
 
 
 @pytest.mark.asyncio
 async def test_delete_schedule_not_found(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock schedule does not exist
     mock_repository.find_schedule_by_id.return_value = None
@@ -45,15 +43,14 @@ async def test_delete_schedule_not_found(mocker):
     use_case = ScheduleDeleteUseCase(mock_repository)
 
     with pytest.raises(HttpNotFoundError, match="Agendamento com o id schedule-id-nonexistent não encontrado!"):
-        await use_case.delete(mock_session, "schedule-id-nonexistent")
+        await use_case.delete( "schedule-id-nonexistent")
 
-    mock_repository.find_schedule_by_id.assert_called_once_with(mock_session, "schedule-id-nonexistent")
+    mock_repository.find_schedule_by_id.assert_called_once_with( "schedule-id-nonexistent")
 
 
 @pytest.mark.asyncio
 async def test_delete_schedule_future_date(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock schedule exists but date is in the future
     fake_schedule = MagicMock()
@@ -69,17 +66,16 @@ async def test_delete_schedule_future_date(mocker):
         use_case = ScheduleDeleteUseCase(mock_repository)
 
         with pytest.raises(HttpUnauthorized, match="Não é possivel excluir o agendamento, pois o agendamento ainda não aconteceu!"):
-            await use_case.delete(mock_session, "schedule-id-123")
+            await use_case.delete( "schedule-id-123")
 
         # Verify that find_schedule_by_id was called twice (once for validation, once for date check)
         assert mock_repository.find_schedule_by_id.call_count == 2
-        mock_repository.find_schedule_by_id.assert_any_call(mock_session, "schedule-id-123")
+        mock_repository.find_schedule_by_id.assert_any_call("schedule-id-123")
 
 
 @pytest.mark.asyncio
 async def test_delete_schedule_same_date(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock schedule exists and date is today (should allow deletion)
     fake_schedule = MagicMock()
@@ -93,11 +89,11 @@ async def test_delete_schedule_same_date(mocker):
         mock_date.side_effect = lambda *args, **kw: date(*args, **kw)
 
         use_case = ScheduleDeleteUseCase(mock_repository)
-        result = await use_case.delete(mock_session, "schedule-id-123")
+        result = await use_case.delete( "schedule-id-123")
 
         assert result["message"] == "Agendamento deletado com sucesso"
 
         # Verify that find_schedule_by_id was called twice (once for validation, once for date check)
         assert mock_repository.find_schedule_by_id.call_count == 2
-        mock_repository.find_schedule_by_id.assert_any_call(mock_session, "schedule-id-123")
-        mock_repository.delete_schedule.assert_called_once_with(mock_session, "schedule-id-123")
+        mock_repository.find_schedule_by_id.assert_any_call("schedule-id-123")
+        mock_repository.delete_schedule.assert_called_once_with("schedule-id-123")

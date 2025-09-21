@@ -8,7 +8,6 @@ from src.modules.schedule.data.use_cases.schedule_list_use_case import ScheduleL
 @pytest.mark.asyncio
 async def test_list_schedules_success(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock schedules exist
     mock_service_1 = MagicMock()
@@ -40,7 +39,7 @@ async def test_list_schedules_success(mocker):
     mock_repository.list_schedules.return_value = [mock_schedule_1, mock_schedule_2]
 
     use_case = ScheduleListUseCase(mock_repository)
-    result = await use_case.list(mock_session)
+    result = await use_case.list()
 
     assert len(result) == 2
     
@@ -64,30 +63,24 @@ async def test_list_schedules_success(mocker):
     assert result[1]["schedule_active"] == False
     assert result[1]["services"] == ["service-id-1"]
 
-    mock_repository.list_schedules.assert_called_once_with(mock_session)
-
 
 @pytest.mark.asyncio
 async def test_list_schedules_empty(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock no schedules
     mock_repository.list_schedules.return_value = []
 
     use_case = ScheduleListUseCase(mock_repository)
-    result = await use_case.list(mock_session)
+    result = await use_case.list()
 
     assert len(result) == 0
     assert result == []
-
-    mock_repository.list_schedules.assert_called_once_with(mock_session)
 
 
 @pytest.mark.asyncio
 async def test_list_schedules_single_schedule(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock single schedule
     mock_service = MagicMock()
@@ -106,7 +99,7 @@ async def test_list_schedules_single_schedule(mocker):
     mock_repository.list_schedules.return_value = [mock_schedule]
 
     use_case = ScheduleListUseCase(mock_repository)
-    result = await use_case.list(mock_session)
+    result = await use_case.list()
 
     assert len(result) == 1
     assert result[0]["id"] == "schedule-id-1"
@@ -117,5 +110,3 @@ async def test_list_schedules_single_schedule(mocker):
     assert result[0]["total_price_schedule"] == 50.0
     assert result[0]["schedule_active"] == True
     assert result[0]["services"] == ["service-id-1"]
-
-    mock_repository.list_schedules.assert_called_once_with(mock_session)

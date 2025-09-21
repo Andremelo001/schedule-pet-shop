@@ -7,7 +7,6 @@ from src.infra.db.entities.client import Client
 @pytest.mark.asyncio
 async def test_find_client_success(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock client exists
     fake_client = Client(
@@ -21,19 +20,18 @@ async def test_find_client_success(mocker):
 
     use_case = ClientFinderUseCase(mock_repository)
 
-    result = await use_case.find(mock_session, "08855040383")
+    result = await use_case.find( "12345678909")
 
     assert result["id"] == "client-id-123"
     assert result["name"] == "Andre"
     assert result["age"] == 25
     assert result["email"] == "andre@gmail.com"
     assert result["senha"] == "senha123"
-    mock_repository.get_client.assert_called_once_with(mock_session, "08855040383")
+    mock_repository.get_client.assert_called_once_with( "12345678909")
 
 @pytest.mark.asyncio
 async def test_find_client_not_found(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock client does not exist
     mock_repository.get_client.return_value = None
@@ -41,51 +39,47 @@ async def test_find_client_not_found(mocker):
     use_case = ClientFinderUseCase(mock_repository)
 
     with pytest.raises(HttpNotFoundError) as exc_info:
-        await use_case.find(mock_session, "08855040383")
+        await use_case.find( "12345678909")
 
-    assert "Nenhum cliente encontrado com o cpf 08855040383" in str(exc_info.value)
-    mock_repository.get_client.assert_called_once_with(mock_session, "08855040383")
+    assert "Nenhum cliente encontrado com o cpf 12345678909" in str(exc_info.value)
+    mock_repository.get_client.assert_called_once_with( "12345678909")
 
 @pytest.mark.asyncio
 async def test_find_client_invalid_cpf_length(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     use_case = ClientFinderUseCase(mock_repository)
 
     with pytest.raises(HttpBadRequestError) as exc_info:
-        await use_case.find(mock_session, "123456789")  # 9 digits
+        await use_case.find( "123456789")  # 9 digits
 
     assert "Cpf informado não apresenta 11 dígitos" in str(exc_info.value)
 
 @pytest.mark.asyncio
 async def test_find_client_cpf_all_same_digits(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     use_case = ClientFinderUseCase(mock_repository)
 
     with pytest.raises(HttpBadRequestError) as exc_info:
-        await use_case.find(mock_session, "11111111111")  # All same digits
+        await use_case.find( "11111111111")  # All same digits
 
     assert "Cpf informado apresenta todos os dígitos iguais" in str(exc_info.value)
 
 @pytest.mark.asyncio
 async def test_find_client_invalid_cpf_digits(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     use_case = ClientFinderUseCase(mock_repository)
 
     with pytest.raises(HttpBadRequestError) as exc_info:
-        await use_case.find(mock_session, "12345678900")  # Invalid CPF
+        await use_case.find( "12345678900")  # Invalid CPF
 
     assert "Cpf informado é inválido" in str(exc_info.value)
 
 @pytest.mark.asyncio
 async def test_find_client_cpf_with_formatting(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock client exists
     fake_client = Client(
@@ -100,8 +94,8 @@ async def test_find_client_cpf_with_formatting(mocker):
     use_case = ClientFinderUseCase(mock_repository)
 
     # Test with formatted CPF
-    result = await use_case.find(mock_session, "088.550.403-83")
+    result = await use_case.find( "123.456.789-09")
 
     assert result["name"] == "Andre"
     # Should call with clean CPF (no formatting)
-    mock_repository.get_client.assert_called_once_with(mock_session, "08855040383")
+    mock_repository.get_client.assert_called_once_with( "12345678909")

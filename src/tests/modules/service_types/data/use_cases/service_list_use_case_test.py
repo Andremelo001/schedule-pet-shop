@@ -7,7 +7,6 @@ from src.modules.service_types.data.use_cases.service_list_use_case import Servi
 @pytest.mark.asyncio
 async def test_list_services_success(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock services exist
     mock_service_1 = MagicMock()
@@ -25,7 +24,7 @@ async def test_list_services_success(mocker):
     mock_repository.list_services.return_value = [mock_service_1, mock_service_2]
 
     use_case = ServiceListUseCase(mock_repository)
-    result = await use_case.list(mock_session)
+    result = await use_case.list()
 
     assert len(result) == 2
     
@@ -41,30 +40,28 @@ async def test_list_services_success(mocker):
     assert result[1]["type_service"] == "tosa"
     assert result[1]["price"] == 50.0
 
-    mock_repository.list_services.assert_called_once_with(mock_session)
+    mock_repository.list_services.assert_called_once_with()
 
 
 @pytest.mark.asyncio
 async def test_list_services_empty(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock no services
     mock_repository.list_services.return_value = []
 
     use_case = ServiceListUseCase(mock_repository)
-    result = await use_case.list(mock_session)
+    result = await use_case.list()
 
     assert len(result) == 0
     assert result == []
 
-    mock_repository.list_services.assert_called_once_with(mock_session)
+    mock_repository.list_services.assert_called_once_with()
 
 
 @pytest.mark.asyncio
 async def test_list_services_single_service(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock single service
     mock_service = MagicMock()
@@ -76,7 +73,7 @@ async def test_list_services_single_service(mocker):
     mock_repository.list_services.return_value = [mock_service]
 
     use_case = ServiceListUseCase(mock_repository)
-    result = await use_case.list(mock_session)
+    result = await use_case.list()
 
     assert len(result) == 1
     assert result[0]["id"] == "service-id-1"
@@ -84,4 +81,4 @@ async def test_list_services_single_service(mocker):
     assert result[0]["type_service"] == "secar"
     assert result[0]["price"] == 20.0
 
-    mock_repository.list_services.assert_called_once_with(mock_session)
+    mock_repository.list_services.assert_called_once_with()

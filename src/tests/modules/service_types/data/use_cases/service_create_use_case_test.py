@@ -8,7 +8,6 @@ from src.errors.types_errors.http_Unauthorized import HttpUnauthorized
 @pytest.mark.asyncio
 async def test_create_service_success(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock no existing services
     mock_repository.list_services.return_value = []
@@ -21,18 +20,17 @@ async def test_create_service_success(mocker):
     service_data.type_service = "banho"
     service_data.price = 30.0
 
-    result = await use_case.create(mock_session, service_data)
+    result = await use_case.create(service_data)
 
     assert result["message"] == "Serviço cadastrado com sucesso"
 
-    mock_repository.list_services.assert_called_once_with(mock_session)
-    mock_repository.create_service.assert_called_once_with(mock_session, service_data)
+    mock_repository.list_services.assert_called_once_with()
+    mock_repository.create_service.assert_called_once_with(service_data)
 
 
 @pytest.mark.asyncio
 async def test_create_service_invalid_type(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     use_case = ServiceCreateUseCase(mock_repository)
 
@@ -43,13 +41,12 @@ async def test_create_service_invalid_type(mocker):
     service_data.price = 30.0
 
     with pytest.raises(HttpUnauthorized, match="Tipo de serviço não aceito, escolha um dos serviços disponíveis: banho, secar, tosa"):
-        await use_case.create(mock_session, service_data)
+        await use_case.create(service_data)
 
 
 @pytest.mark.asyncio
 async def test_create_service_already_exists(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock existing service with same type and price
     existing_service = MagicMock()
@@ -67,15 +64,14 @@ async def test_create_service_already_exists(mocker):
     service_data.price = 30.0
 
     with pytest.raises(HttpUnauthorized, match="Serviço já existe no banco de dados"):
-        await use_case.create(mock_session, service_data)
+        await use_case.create(service_data)
 
-    mock_repository.list_services.assert_called_once_with(mock_session)
+    mock_repository.list_services.assert_called_once_with()
 
 
 @pytest.mark.asyncio
 async def test_create_service_different_price_same_type(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock existing service with same type but different price
     existing_service = MagicMock()
@@ -92,9 +88,9 @@ async def test_create_service_different_price_same_type(mocker):
     service_data.type_service = "banho"
     service_data.price = 30.0
 
-    result = await use_case.create(mock_session, service_data)
+    result = await use_case.create(service_data)
 
     assert result["message"] == "Serviço cadastrado com sucesso"
 
-    mock_repository.list_services.assert_called_once_with(mock_session)
-    mock_repository.create_service.assert_called_once_with(mock_session, service_data)
+    mock_repository.list_services.assert_called_once_with()
+    mock_repository.create_service.assert_called_once_with(service_data)

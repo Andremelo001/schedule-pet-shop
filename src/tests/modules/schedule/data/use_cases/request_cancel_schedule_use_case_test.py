@@ -8,7 +8,6 @@ from src.errors.types_errors.http_not_found import HttpNotFoundError
 @pytest.mark.asyncio
 async def test_request_cancel_schedule_success(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock schedule exists
     fake_schedule = MagicMock()
@@ -21,12 +20,12 @@ async def test_request_cancel_schedule_success(mocker):
         mock_jwt_service_instance.create_token.return_value = "fake_cancel_token"
 
         use_case = RequestCancelScheduleUseCase(mock_repository)
-        result = await use_case.request_cancel(mock_session, "schedule-id-123")
+        result = await use_case.request_cancel( "schedule-id-123")
 
         assert result["id_schedule"] == "schedule-id-123"
         assert result["token"] == "fake_cancel_token"
 
-        mock_repository.find_schedule_by_id.assert_called_once_with(mock_session, "schedule-id-123")
+        mock_repository.find_schedule_by_id.assert_called_once_with( "schedule-id-123")
         mock_jwt_service_instance.create_token.assert_called_once_with({
             "sub": "schedule-id-123", 
             "role": ["request_cancel_schedule", "admin"]
@@ -36,7 +35,6 @@ async def test_request_cancel_schedule_success(mocker):
 @pytest.mark.asyncio
 async def test_request_cancel_schedule_not_found(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock schedule does not exist
     mock_repository.find_schedule_by_id.return_value = None
@@ -44,15 +42,14 @@ async def test_request_cancel_schedule_not_found(mocker):
     use_case = RequestCancelScheduleUseCase(mock_repository)
 
     with pytest.raises(HttpNotFoundError, match="Agendamento com o id schedule-id-nonexistent não encontrado"):
-        await use_case.request_cancel(mock_session, "schedule-id-nonexistent")
+        await use_case.request_cancel( "schedule-id-nonexistent")
 
-    mock_repository.find_schedule_by_id.assert_called_once_with(mock_session, "schedule-id-nonexistent")
+    mock_repository.find_schedule_by_id.assert_called_once_with( "schedule-id-nonexistent")
 
 
 @pytest.mark.asyncio
 async def test_request_cancel_schedule_with_different_id(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock schedule exists with different ID
     fake_schedule = MagicMock()
@@ -65,12 +62,12 @@ async def test_request_cancel_schedule_with_different_id(mocker):
         mock_jwt_service_instance.create_token.return_value = "another_cancel_token"
 
         use_case = RequestCancelScheduleUseCase(mock_repository)
-        result = await use_case.request_cancel(mock_session, "schedule-id-456")
+        result = await use_case.request_cancel( "schedule-id-456")
 
         assert result["id_schedule"] == "schedule-id-456"
         assert result["token"] == "another_cancel_token"
 
-        mock_repository.find_schedule_by_id.assert_called_once_with(mock_session, "schedule-id-456")
+        mock_repository.find_schedule_by_id.assert_called_once_with( "schedule-id-456")
         mock_jwt_service_instance.create_token.assert_called_once_with({
             "sub": "schedule-id-456", 
             "role": ["request_cancel_schedule", "admin"]

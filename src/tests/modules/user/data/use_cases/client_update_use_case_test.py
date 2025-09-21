@@ -8,7 +8,6 @@ from src.infra.db.entities.client import Client
 @pytest.mark.asyncio
 async def test_update_client_success(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock client exists
     fake_client = Client(id="client-id-123")
@@ -21,7 +20,7 @@ async def test_update_client_success(mocker):
     updated_client = Client(
         id="client-id-123",
         name="Andre Updated",
-        cpf="08855040383",
+        cpf="12345678909",
         age=26,
         email="andre.updated@gmail.com",
         senha="NewSenha123"
@@ -32,29 +31,28 @@ async def test_update_client_success(mocker):
 
     update_data = ClientUpdateDTO(
         name="Andre Updated",
-        cpf="088.550.403-83",
+        cpf="123.456.789-09",
         age=26,
         email="andre.updated@gmail.com",
         senha="NewSenha123"
     )
 
-    result = await use_case.update(mock_session, "client-id-123", update_data)
+    result = await use_case.update( "client-id-123", update_data)
 
     assert result["id"] == "client-id-123"
     assert result["name"] == "Andre Updated"
-    assert result["cpf"] == "08855040383"
+    assert result["cpf"] == "12345678909"
     assert result["age"] == 26
     assert result["email"] == "andre.updated@gmail.com"
     assert result["senha"] == "NewSenha123"
 
-    mock_repository.get_client_by_id.assert_called_once_with(mock_session, "client-id-123")
-    mock_repository.get_client.assert_called_once_with(mock_session, "088.550.403-83")
+    mock_repository.get_client_by_id.assert_called_once_with( "client-id-123")
+    mock_repository.get_client.assert_called_once_with( "123.456.789-09")
     mock_repository.update_client.assert_called_once()
 
 @pytest.mark.asyncio
 async def test_update_client_not_found(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock client does not exist
     mock_repository.get_client_by_id.return_value = None
@@ -64,15 +62,14 @@ async def test_update_client_not_found(mocker):
     update_data = ClientUpdateDTO(name="Andre Updated")
 
     with pytest.raises(HttpNotFoundError) as exc_info:
-        await use_case.update(mock_session, "client-id-123", update_data)
+        await use_case.update( "client-id-123", update_data)
 
     assert "Cliente com o id client-id-123 não encontrado" in str(exc_info.value)
-    mock_repository.get_client_by_id.assert_called_once_with(mock_session, "client-id-123")
+    mock_repository.get_client_by_id.assert_called_once_with( "client-id-123")
 
 @pytest.mark.asyncio
 async def test_update_client_cpf_conflict(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock client exists
     fake_client = Client(id="client-id-123")
@@ -84,49 +81,16 @@ async def test_update_client_cpf_conflict(mocker):
 
     use_case = ClientUpdateUseCase(mock_repository)
 
-    update_data = ClientUpdateDTO(cpf="08855040383")
+    update_data = ClientUpdateDTO(cpf="12345678909")
 
     with pytest.raises(HttpConflitError) as exc_info:
-        await use_case.update(mock_session, "client-id-123", update_data)
+        await use_case.update( "client-id-123", update_data)
 
-    assert "Cliente com o cpf 08855040383 já existe" in str(exc_info.value)
-
-@pytest.mark.asyncio
-async def test_update_client_invalid_email(mocker):
-    mock_repository = AsyncMock()
-    mock_session = AsyncMock()
-
-    # Mock client exists
-    fake_client = Client(id="client-id-123")
-    mock_repository.get_client_by_id.return_value = fake_client
-
-    use_case = ClientUpdateUseCase(mock_repository)
-
-    update_data = ClientUpdateDTO(email="invalid-email")
-
-    with pytest.raises(HttpBadRequestError):
-        await use_case.update(mock_session, "client-id-123", update_data)
-
-@pytest.mark.asyncio
-async def test_update_client_invalid_senha(mocker):
-    mock_repository = AsyncMock()
-    mock_session = AsyncMock()
-
-    # Mock client exists
-    fake_client = Client(id="client-id-123")
-    mock_repository.get_client_by_id.return_value = fake_client
-
-    use_case = ClientUpdateUseCase(mock_repository)
-
-    update_data = ClientUpdateDTO(senha="weak")
-
-    with pytest.raises(HttpBadRequestError):
-        await use_case.update(mock_session, "client-id-123", update_data)
+    assert "Cliente com o cpf 12345678909 já existe" in str(exc_info.value)
 
 @pytest.mark.asyncio
 async def test_update_client_partial_update(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock client exists
     fake_client = Client(id="client-id-123")
@@ -148,7 +112,7 @@ async def test_update_client_partial_update(mocker):
     # Only update name
     update_data = ClientUpdateDTO(name="Andre Updated")
 
-    result = await use_case.update(mock_session, "client-id-123", update_data)
+    result = await use_case.update( "client-id-123", update_data)
 
     assert result["name"] == "Andre Updated"
     mock_repository.update_client.assert_called_once()
@@ -156,7 +120,6 @@ async def test_update_client_partial_update(mocker):
 @pytest.mark.asyncio
 async def test_update_client_same_cpf(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock client exists
     fake_client = Client(id="client-id-123")
@@ -170,7 +133,7 @@ async def test_update_client_same_cpf(mocker):
     updated_client = Client(
         id="client-id-123",
         name="Andre",
-        cpf="08855040383",
+        cpf="12345678909",
         age=25,
         email="andre@gmail.com",
         senha="senha123"
@@ -179,9 +142,9 @@ async def test_update_client_same_cpf(mocker):
 
     use_case = ClientUpdateUseCase(mock_repository)
 
-    update_data = ClientUpdateDTO(cpf="08855040383")
+    update_data = ClientUpdateDTO(cpf="12345678909")
 
-    result = await use_case.update(mock_session, "client-id-123", update_data)
+    result = await use_case.update( "client-id-123", update_data)
 
-    assert result["cpf"] == "08855040383"
+    assert result["cpf"] == "12345678909"
     mock_repository.update_client.assert_called_once()

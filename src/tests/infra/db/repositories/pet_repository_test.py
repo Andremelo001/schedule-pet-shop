@@ -97,7 +97,7 @@ async def test_get_pet(mocker):
 
 @pytest.mark.asyncio
 async def test_get_all_pets_by_cpf_client(mocker):
-    fake_cpf = "08855040383"
+    fake_cpf = "12345678909"
     fake_pets = [Pet(name="Rex"), Pet(name="Max")]
 
     mock_result = MagicMock()

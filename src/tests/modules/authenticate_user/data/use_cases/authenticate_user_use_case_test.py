@@ -8,7 +8,6 @@ from src.errors.types_errors.http_Unauthorized import HttpUnauthorized
 @pytest.mark.asyncio
 async def test_generate_token_user_success(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock user exists
     fake_user = MagicMock()
@@ -29,11 +28,11 @@ async def test_generate_token_user_success(mocker):
             mock_jwt_service_instance.create_token.return_value = "fake_jwt_token"
 
             use_case = AuthenticateUserUseCase(mock_repository)
-            result = await use_case.generate_token(mock_session, "user@example.com", "correct_password")
+            result = await use_case.generate_token("user@example.com", "correct_password")
 
             assert result == "fake_jwt_token"
 
-            mock_repository.get_client_by_email.assert_called_once_with(mock_session, "user@example.com")
+            mock_repository.get_client_by_email.assert_called_once_with("user@example.com")
             mock_password_hasher_instance.verify.assert_called_once_with("correct_password", "hashed_password")
             mock_jwt_service_instance.create_token.assert_called_once_with({"sub": "correct_password", "role": "client"})
 
@@ -41,7 +40,6 @@ async def test_generate_token_user_success(mocker):
 @pytest.mark.asyncio
 async def test_generate_token_user_not_found(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock user does not exist
     mock_repository.get_client_by_email.return_value = None
@@ -54,15 +52,14 @@ async def test_generate_token_user_not_found(mocker):
         use_case = AuthenticateUserUseCase(mock_repository)
 
         with pytest.raises(HttpUnauthorized, match="Invalid email or password"):
-            await use_case.generate_token(mock_session, "nonexistent@example.com", "any_password")
+            await use_case.generate_token("nonexistent@example.com", "any_password")
 
-        mock_repository.get_client_by_email.assert_called_once_with(mock_session, "nonexistent@example.com")
+        mock_repository.get_client_by_email.assert_called_once_with("nonexistent@example.com")
 
 
 @pytest.mark.asyncio
 async def test_generate_token_user_invalid_password(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock user exists
     fake_user = MagicMock()
@@ -79,16 +76,15 @@ async def test_generate_token_user_invalid_password(mocker):
         use_case = AuthenticateUserUseCase(mock_repository)
 
         with pytest.raises(HttpUnauthorized, match="Invalid email or password"):
-            await use_case.generate_token(mock_session, "user@example.com", "wrong_password")
+            await use_case.generate_token("user@example.com", "wrong_password")
 
-        mock_repository.get_client_by_email.assert_called_once_with(mock_session, "user@example.com")
+        mock_repository.get_client_by_email.assert_called_once_with("user@example.com")
         mock_password_hasher_instance.verify.assert_called_once_with("wrong_password", "hashed_password")
 
 
 @pytest.mark.asyncio
 async def test_verify_user_success(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock user exists
     fake_user = MagicMock()
@@ -104,7 +100,7 @@ async def test_verify_user_success(mocker):
 
         use_case = AuthenticateUserUseCase(mock_repository)
         # Should not raise any exception
-        await use_case.verify_user(mock_session, "user@example.com", "correct_password")
+        await use_case.verify_user("user@example.com", "correct_password")
 
-        mock_repository.get_client_by_email.assert_called_once_with(mock_session, "user@example.com")
+        mock_repository.get_client_by_email.assert_called_once_with("user@example.com")
         mock_password_hasher_instance.verify.assert_called_once_with("correct_password", "hashed_password")

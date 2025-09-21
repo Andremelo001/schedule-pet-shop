@@ -8,7 +8,6 @@ from src.errors.types_errors.http_Unauthorized import HttpUnauthorized
 @pytest.mark.asyncio
 async def test_generate_token_admin_success(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock admin exists
     fake_admin = MagicMock()
@@ -29,11 +28,11 @@ async def test_generate_token_admin_success(mocker):
             mock_jwt_service_instance.create_token.return_value = "fake_jwt_token"
 
             use_case = AutheticateAdminUseCase(mock_repository)
-            result = await use_case.generate_token_admin(mock_session, "correct_password", "admin_user")
+            result = await use_case.generate_token_admin("correct_password", "admin_user")
 
             assert result == "fake_jwt_token"
 
-            mock_repository.get_admin_by_user.assert_called_once_with(mock_session, "admin_user")
+            mock_repository.get_admin_by_user.assert_called_once_with("admin_user")
             mock_password_hasher_instance.verify.assert_called_once_with("correct_password", "hashed_password")
             mock_jwt_service_instance.create_token.assert_called_once_with({"sub": "correct_password", "role": "admin"})
 
@@ -41,7 +40,6 @@ async def test_generate_token_admin_success(mocker):
 @pytest.mark.asyncio
 async def test_generate_token_admin_user_not_found(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock admin does not exist
     mock_repository.get_admin_by_user.return_value = None
@@ -54,15 +52,14 @@ async def test_generate_token_admin_user_not_found(mocker):
         use_case = AutheticateAdminUseCase(mock_repository)
 
         with pytest.raises(HttpUnauthorized, match="Invalid email or password"):
-            await use_case.generate_token_admin(mock_session, "any_password", "nonexistent_user")
+            await use_case.generate_token_admin("any_password", "nonexistent_user")
 
-        mock_repository.get_admin_by_user.assert_called_once_with(mock_session, "nonexistent_user")
+        mock_repository.get_admin_by_user.assert_called_once_with("nonexistent_user")
 
 
 @pytest.mark.asyncio
 async def test_generate_token_admin_invalid_password(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock admin exists
     fake_admin = MagicMock()
@@ -79,16 +76,15 @@ async def test_generate_token_admin_invalid_password(mocker):
         use_case = AutheticateAdminUseCase(mock_repository)
 
         with pytest.raises(HttpUnauthorized, match="Invalid email or password"):
-            await use_case.generate_token_admin(mock_session, "wrong_password", "admin_user")
+            await use_case.generate_token_admin("wrong_password", "admin_user")
 
-        mock_repository.get_admin_by_user.assert_called_once_with(mock_session, "admin_user")
+        mock_repository.get_admin_by_user.assert_called_once_with("admin_user")
         mock_password_hasher_instance.verify.assert_called_once_with("wrong_password", "hashed_password")
 
 
 @pytest.mark.asyncio
 async def test_verify_user_success(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock admin exists
     fake_admin = MagicMock()
@@ -104,7 +100,7 @@ async def test_verify_user_success(mocker):
 
         use_case = AutheticateAdminUseCase(mock_repository)
         # Should not raise any exception
-        await use_case.verify_user(mock_session, "correct_password", "admin_user")
+        await use_case.verify_user("correct_password", "admin_user")
 
-        mock_repository.get_admin_by_user.assert_called_once_with(mock_session, "admin_user")
+        mock_repository.get_admin_by_user.assert_called_once_with("admin_user")
         mock_password_hasher_instance.verify.assert_called_once_with("correct_password", "hashed_password")

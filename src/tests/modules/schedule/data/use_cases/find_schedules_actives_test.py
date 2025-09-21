@@ -8,7 +8,6 @@ from src.modules.schedule.data.use_cases.find_schedules_actives import FindSched
 @pytest.mark.asyncio
 async def test_find_schedules_actives_success(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock active schedules exist
     mock_service_1 = MagicMock()
@@ -40,7 +39,7 @@ async def test_find_schedules_actives_success(mocker):
     mock_repository.find_schedules_available.return_value = [mock_schedule_1, mock_schedule_2]
 
     use_case = FindSchedulesActivesUseCase(mock_repository)
-    result = await use_case.find_schedules_actives(mock_session)
+    result = await use_case.find_schedules_actives()
 
     assert len(result) == 2
     
@@ -64,30 +63,28 @@ async def test_find_schedules_actives_success(mocker):
     assert result[1]["schedule_active"] == True
     assert result[1]["services"] == ["service-id-1"]
 
-    mock_repository.find_schedules_available.assert_called_once_with(mock_session)
+    mock_repository.find_schedules_available.assert_called_once_with()
 
 
 @pytest.mark.asyncio
 async def test_find_schedules_actives_empty(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock no active schedules
     mock_repository.find_schedules_available.return_value = []
 
     use_case = FindSchedulesActivesUseCase(mock_repository)
-    result = await use_case.find_schedules_actives(mock_session)
+    result = await use_case.find_schedules_actives()
 
     assert len(result) == 0
     assert result == []
 
-    mock_repository.find_schedules_available.assert_called_once_with(mock_session)
+    mock_repository.find_schedules_available.assert_called_once_with()
 
 
 @pytest.mark.asyncio
 async def test_find_schedules_actives_single_schedule(mocker):
     mock_repository = AsyncMock()
-    mock_session = AsyncMock()
 
     # Mock single active schedule
     mock_service = MagicMock()
@@ -106,7 +103,7 @@ async def test_find_schedules_actives_single_schedule(mocker):
     mock_repository.find_schedules_available.return_value = [mock_schedule]
 
     use_case = FindSchedulesActivesUseCase(mock_repository)
-    result = await use_case.find_schedules_actives(mock_session)
+    result = await use_case.find_schedules_actives()
 
     assert len(result) == 1
     assert result[0]["id"] == "schedule-id-1"
@@ -118,4 +115,4 @@ async def test_find_schedules_actives_single_schedule(mocker):
     assert result[0]["schedule_active"] == True
     assert result[0]["services"] == ["service-id-1"]
 
-    mock_repository.find_schedules_available.assert_called_once_with(mock_session)
+    mock_repository.find_schedules_available.assert_called_once_with()
