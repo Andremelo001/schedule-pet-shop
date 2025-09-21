@@ -1,4 +1,3 @@
-from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Dict
 
 from src.modules.schedule.domain.use_cases.interface_cancel_schedule import InterfaceCancelScheduleUsecase
@@ -11,23 +10,23 @@ from src.drivers.email_sender.dto.mail_body_dto import MailBody
 
 class CancelScheduleUseCase(InterfaceCancelScheduleUsecase):
     def __init__(self, repository: InterfaceScheduleRepository):
-        self.repository = repository
+        self.__repository = repository
 
 
-    async def cancel(self, session: AsyncSession, id_schedule: str) -> Dict:
+    async def cancel(self, id_schedule: str) -> Dict:
 
-        await self.repository.cancel_schedule(session, id_schedule)
+        await self.__repository.cancel_schedule(id_schedule)
 
-        await self.send_email_for_client(session, id_schedule)
+        await self.send_email_for_client(id_schedule)
 
         return {"message": "Agendamento cancelado com sucesso"}
 
 
-    async def send_email_for_client(self, session: AsyncSession, id_schedule: str) -> None:
+    async def send_email_for_client(self, id_schedule: str) -> None:
 
         email_service = EmailService()
 
-        email = await self.repository.find_email_client_by_id_schedule(session, id_schedule)
+        email = await self.__repository.find_email_client_by_id_schedule(id_schedule)
 
         # Monta e-mail para o cliente
         mail_body = MailBody(

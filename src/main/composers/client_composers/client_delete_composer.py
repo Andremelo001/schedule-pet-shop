@@ -6,10 +6,10 @@ from src.presentation.controllers.user_controllers.client_delete_controller impo
 
 async def client_delete_composer(session: AsyncSession, http_request: HttpRequest):
 
-    repository = ClientRepository()
+    repository = ClientRepository(session)
 
     use_case = ClientDeleteUseCase(repository)
 
     controller = ClientDeleteController(use_case)
 
-    return await controller.handle(session, http_request)
+    return await controller.handle(http_request)

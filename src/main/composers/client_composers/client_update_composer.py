@@ -7,10 +7,10 @@ from src.presentation.http_types.http_request import HttpRequest
 
 async def client_update_composer(session: AsyncSession, http_request: HttpRequest):
 
-    repository = ClientRepository()
+    repository = ClientRepository(session)
 
     use_case = ClientUpdateUseCase(repository)
 
     controller = ClientUpdateController(use_case)
 
-    return await controller.handle(session, http_request)
+    return await controller.handle(http_request)

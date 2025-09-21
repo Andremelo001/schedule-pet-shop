@@ -13,9 +13,10 @@ from src.infra.db.entities.schedule import ScheduleServices, Schedule as Schedul
 from src.modules.schedule.domain.models.schedule import Schedule
 
 class ServiceRepository(InterfaceServiceRepository):
+    def __init__(self, session: AsyncSession):
+        self.__session = session
 
-    @classmethod
-    async def create_service(cls, session: AsyncSession, service: ServiceDTO) -> Service:
+    async def create_service(self, service: ServiceDTO) -> Service:
         try:
             new_service = ServicesEntitie(
                 id= uuid4(),
@@ -24,48 +25,46 @@ class ServiceRepository(InterfaceServiceRepository):
                 price=service.price
             )
 
-            session.add(new_service)
-            await session.commit()
-            await session.refresh(new_service)
+            self.__session.add(new_service)
+            await self.__session.commit()
+            await self.__session.refresh(new_service)
 
         except Exception as exception:
-            await session.rollback()
+            await self.__session.rollback()
             raise exception
         
-    @classmethod
-    async def find_service_by_id(cls, session: AsyncSession, id_service: str) -> Service:
+    async def find_service_by_id(self, id_service: str) -> Service:
 
-        service = (await session.execute(select(ServicesEntitie).where(ServicesEntitie.id == id_service))).scalar_one_or_none()
+        service = (await self.__session.execute(select(ServicesEntitie).where(ServicesEntitie.id == id_service))).scalar_one_or_none()
 
         return service
     
-    @classmethod
-    async def list_services(cls, session: AsyncSession) -> List[Service]:
+    async def list_services(self) -> List[Service]:
 
-        return (await session.execute(select(ServicesEntitie))).scalars().all()
+        return (await self.__session.execute(select(ServicesEntitie))).scalars().all()
     
-    async def update_service(cls, session: AsyncSession, service: UpdateServiceDTO, id_service: str) -> Service:
+    async def update_service(self, service: UpdateServiceDTO, id_service: str) -> Service:
 
-        new_service = (await session.execute(select(ServicesEntitie).where(ServicesEntitie.id == id_service))).scalar_one_or_none()
+        new_service = (await self.__session.execute(select(ServicesEntitie).where(ServicesEntitie.id == id_service))).scalar_one_or_none()
 
         for key, value in service.model_dump(exclude_unset=True).items():
             setattr(new_service, key, value)
 
-        await session.commit()
-        await session.refresh(new_service)
+        await self.__session.commit()
+        await self.__session.refresh(new_service)
 
         return new_service
 
-    async def delete_service(cls, session: AsyncSession, id_service: str) -> None:
+    async def delete_service(self, id_service: str) -> None:
 
-        service = (await session.execute(select(ServicesEntitie).where(ServicesEntitie.id == id_service))).scalar_one_or_none()
+        service = (await self.__session.execute(select(ServicesEntitie).where(ServicesEntitie.id == id_service))).scalar_one_or_none()
 
-        await session.delete(service)
+        await self.__session.delete(service)
 
-        await session.commit()
+        await self.__session.commit()
 
-    async def get_schedules_by_service_id(cls, session: AsyncSession, id_service: str) -> List[Schedule]:
+    async def get_schedules_by_service_id(self, id_service: str) -> List[Schedule]:
 
-        schedules = await session.execute(select(ScheduleEntitie).join(ScheduleServices, ScheduleEntitie.id == ScheduleServices.schedule_id).where(ScheduleServices.services_id == id_service))
+        schedules = await self.__session.execute(select(ScheduleEntitie).join(ScheduleServices, ScheduleEntitie.id == ScheduleServices.schedule_id).where(ScheduleServices.services_id == id_service))
 
         return schedules.scalars().all()

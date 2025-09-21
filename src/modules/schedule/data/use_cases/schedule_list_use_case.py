@@ -1,22 +1,19 @@
 from typing import Dict, List
-
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from src.modules.schedule.domain.use_cases.interface_schedule_list import InterfaceScheduleListUsecase
 from src.modules.schedule.data.interfaces.interface_schedule_repository import InterfaceScheduleRepository
-
 from src.modules.schedule.domain.models.schedule import Schedule
 
 class ScheduleListUseCase(InterfaceScheduleListUsecase):
     def __init__(self, repository: InterfaceScheduleRepository):
-        self.repository = repository
+        self.__repository = repository
 
-    async def list(self, session: AsyncSession) -> List[Dict]:
+    async def list(self) -> List[Dict]:
 
-        schedules = await self.repository.list_schedules(session)
+        schedules = await self.__repository.list_schedules()
 
         return self.__format_response(schedules)
 
+    @classmethod
     def __format_response(cls, schedules: List[Schedule]) -> List[Dict]:
 
         return [

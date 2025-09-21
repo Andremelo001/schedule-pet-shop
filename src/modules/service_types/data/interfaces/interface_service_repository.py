@@ -1,4 +1,3 @@
-from sqlalchemy.ext.asyncio import AsyncSession
 from abc import ABC, abstractmethod
 from typing import List
 
@@ -10,21 +9,21 @@ from src.modules.schedule.domain.models.schedule import Schedule
 class InterfaceServiceRepository(ABC):
 
     @abstractmethod
-    async def create_service(cls, session: AsyncSession, service: ServiceDTO) -> Service: pass
+    async def create_service(self, service: ServiceDTO) -> Service: pass
 
     @abstractmethod
-    async def list_services(cls, session: AsyncSession) -> List[Service]: pass
+    async def list_services(self) -> List[Service]: pass
 
     @abstractmethod
-    async def find_service_by_id(cls, session: AsyncSession, id_service: str) -> Service: pass
+    async def find_service_by_id(self, id_service: str) -> Service: pass
 
     @abstractmethod
-    async def update_service(cls, session: AsyncSession, service: UpdateServiceDTO, id_service: str) -> Service: pass
+    async def update_service(self, service: UpdateServiceDTO, id_service: str) -> Service: pass
 
     @abstractmethod
-    async def delete_service(cls, session: AsyncSession, id_service: str) -> None: pass
+    async def delete_service(self, id_service: str) -> None: pass
 
     @abstractmethod
-    async def get_schedules_by_service_id(cls, session: AsyncSession, id_service: str) -> List[Schedule]: pass
+    async def get_schedules_by_service_id(self, id_service: str) -> List[Schedule]: pass
 
     

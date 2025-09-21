@@ -1,4 +1,3 @@
-from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Dict
 
 from src.modules.user.domain.use_cases.interface_get_client_with_pets_and_schedules import InterfaceGetClientWithPetsAndSchedules
@@ -9,19 +8,19 @@ from src.errors.error_handler import HttpNotFoundError
 
 class GetClientWithPetsAndSchedulesUseCase(InterfaceGetClientWithPetsAndSchedules):
     def __init__(self, repository: InterfaceClientRepository):
-        self.repository = repository
+        self.__repository = repository
 
-    async def get_client_with_pets_and_schedules(self, session: AsyncSession, id_client: str) -> Dict:
+    async def get_client_with_pets_and_schedules(self, id_client: str) -> Dict:
 
-        await self.__client_not_found(session, id_client)
+        await self.__client_not_found(id_client)
 
-        client = await self.repository.get_client_with_pets_and_schedules_by_id(session, id_client)
+        client = await self.__repository.get_client_with_pets_and_schedules_by_id(id_client)
 
         return self.__format_response(client)
 
-    async def __client_not_found(self, session: AsyncSession, id_client: str):
+    async def __client_not_found(self, id_client: str):
 
-        client = await self.repository.get_client_by_id(session, id_client)
+        client = await self.__repository.get_client_by_id(id_client)
 
         if not client:
             raise HttpNotFoundError(f"Cliente com o id {id_client} não encontrado")

@@ -1,12 +1,12 @@
 from typing import Callable
 from fastapi import Request
-from sqlalchemy.ext.asyncio import AsyncSession
 import json
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.presentation.http_types.http_request import HttpRequest
 from src.presentation.http_types.http_response import HttpResponse
 
-async def request_adapter(request: Request, session: AsyncSession, controller: Callable) -> HttpResponse:
+async def request_adapter(request: Request, session: AsyncSession, composer: Callable) -> HttpResponse:
 
     try:
         body = await request.json() if await request.body() else {}
@@ -21,6 +21,6 @@ async def request_adapter(request: Request, session: AsyncSession, controller: C
         url=str(request.url)
     )
 
-    http_response = await controller(session, http_request)
+    http_response = await composer(session, http_request)
 
     return http_response

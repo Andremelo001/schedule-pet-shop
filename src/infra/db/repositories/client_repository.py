@@ -15,22 +15,22 @@ from src.modules.user.dto.client_dto import ClientDTO, ClientUpdateDTO
 
 
 class ClientRepository(InterfaceClientRepository):
-    @classmethod
-    async def get_client_by_id(cls, session: AsyncSession, id_client: str) -> Client:
+    def __init__(self, session: AsyncSession):
+        self.__session = session
 
-        client = await session.execute(select(ClientEntitie).where(ClientEntitie.id == id_client))
+    async def get_client_by_id(self, id_client: str) -> Client:
 
-        return client.scalar_one_or_none()
-
-    @classmethod
-    async def get_client(cls, session: AsyncSession, cpf_client: str) -> Client:
-
-        client = await session.execute(select(ClientEntitie).where(ClientEntitie.cpf == cpf_client))
+        client = await self.__session.execute(select(ClientEntitie).where(ClientEntitie.id == id_client))
 
         return client.scalar_one_or_none()
 
-    @classmethod
-    async def create_client(cls, session: AsyncSession, client: ClientDTO) -> None:
+    async def get_client(self, cpf_client: str) -> Client:
+
+        client = await self.__session.execute(select(ClientEntitie).where(ClientEntitie.cpf == cpf_client))
+
+        return client.scalar_one_or_none()
+
+    async def create_client(self, client: ClientDTO) -> None:
         
         try:
             new_client = ClientEntitie(
@@ -42,50 +42,45 @@ class ClientRepository(InterfaceClientRepository):
                 senha= client.senha,
             )
 
-            session.add(new_client)
-            await session.commit()
-            await session.refresh(new_client)
+            self.__session.add(new_client)
+            await self.__session.commit()
+            await self.__session.refresh(new_client)
         
         except Exception as exception:
-            await session.rollback()
+            await self.__session.rollback()
             raise exception
         
-    @classmethod
-    async def update_client(cls, session: AsyncSession, id_client: str, client: ClientUpdateDTO) -> Client:
+    async def update_client(self, id_client: str, client: ClientUpdateDTO) -> Client:
 
-        new_client = (await session.execute(select(ClientEntitie).where(ClientEntitie.id == id_client))).scalar_one_or_none()
+        new_client = (await self.__session.execute(select(ClientEntitie).where(ClientEntitie.id == id_client))).scalar_one_or_none()
 
         for key, value in client.model_dump(exclude_unset=True).items():
             setattr(new_client, key, value)
 
-        await session.commit()
-        await session.refresh(new_client)
+        await self.__session.commit()
+        await self.__session.refresh(new_client)
 
         return new_client
     
-    @classmethod
-    async def delete_client(cls, session: AsyncSession, id_client: str) -> None:
+    async def delete_client(self, id_client: str) -> None:
 
-        client = (await session.execute(select(ClientEntitie).where(ClientEntitie.id == id_client))).scalar_one_or_none()
+        client = (await self.__session.execute(select(ClientEntitie).where(ClientEntitie.id == id_client))).scalar_one_or_none()
 
-        await session.delete(client)
-        await session.commit()
+        await self.__session.delete(client)
+        await self.__session.commit()
 
-    @classmethod
-    async def get_client_by_email(cls, session: AsyncSession, email: str) -> Client:
+    async def get_client_by_email(self, email: str) -> Client:
 
-        user = await session.execute(select(ClientEntitie).where(ClientEntitie.email == email))
+        user = await self.__session.execute(select(ClientEntitie).where(ClientEntitie.email == email))
 
         return user.scalar_one_or_none()
     
-    @classmethod
-    async def get_client_with_pets_and_schedules_by_id(cls, session: AsyncSession, id_client: str) -> ClientWithPetsWithSchedules:
+    async def get_client_with_pets_and_schedules_by_id(self, id_client: str) -> ClientWithPetsWithSchedules:
 
-        client = (await session.execute(select(ClientEntitie).options(selectinload(ClientEntitie.pets), selectinload(ClientEntitie.schedules)).where(ClientEntitie.id == id_client))).scalar_one_or_none()
+        client = (await self.__session.execute(select(ClientEntitie).options(selectinload(ClientEntitie.pets), selectinload(ClientEntitie.schedules)).where(ClientEntitie.id == id_client))).scalar_one_or_none()
 
         return client
     
-    @classmethod
-    async def find_schedule_by_id_client(cls, session: AsyncSession, id_client: str) -> List[Schedule]:
+    async def find_schedule_by_id_client(self, id_client: str) -> List[Schedule]:
 
-        return (await session.execute(select(Schedule).where(Schedule.client_id == id_client))).scalars().all()
+        return (await self.__session.execute(select(Schedule).where(Schedule.client_id == id_client))).scalars().all()

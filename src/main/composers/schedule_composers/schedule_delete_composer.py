@@ -7,10 +7,10 @@ from src.presentation.http_types.http_request import HttpRequest
 
 async def schedule_delete_composer(session: AsyncSession, http_request: HttpRequest):
 
-    repository = ScheduleRepository()
+    repository = ScheduleRepository(session)
 
     use_case = ScheduleDeleteUseCase(repository)
 
     controller = ScheduleDeleteController(use_case)
 
-    return await controller.handle(session, http_request)
+    return await controller.handle(http_request)

@@ -1,21 +1,19 @@
 from typing import Dict, List
 from datetime import datetime, time, timedelta, date
-
-from sqlalchemy.ext.asyncio import AsyncSession
 from src.modules.schedule.dto.schedule_dto import ScheduleDTO
-
 from src.errors.error_handler import HttpUnauthorized
-
 from src.modules.schedule.domain.use_cases.interface_schedule_create import InterfaceScheduleCreateUsecase
 from src.modules.schedule.data.interfaces.interface_schedule_repository import InterfaceScheduleRepository
 
 class ScheduleCreateUseCase(InterfaceScheduleCreateUsecase):
     def __init__(self, repository: InterfaceScheduleRepository):
-        self.repository = repository
+        self.__repository = repository
 
-    async def create(self, session: AsyncSession, schedule: ScheduleDTO) -> Dict:
+    async def create(self, schedule: ScheduleDTO) -> Dict:
 
-        await self.__validate_temp_services_in_schedule(session, schedule)
+        await self.__validate_temp_services_in_schedule(schedule)
+
+        await self.__validate_pet_exists(schedule.id_pet, schedule.id_client)
 
         self.__validate_time_schedule(schedule.time_schedule)
 
@@ -23,15 +21,20 @@ class ScheduleCreateUseCase(InterfaceScheduleCreateUsecase):
 
         self.__validate_total_services_in_schedule(schedule.list_services)
 
-        await self.__validate_schedule_conflicts(session, schedule)
+        await self.__validate_schedule_conflicts(schedule)
 
-        await self.repository.create_schedule(session, schedule)
+        return await self.__register_schedule_informations(schedule)
+    
+    async def __validate_pet_exists(self, pet_id: str, id_client: str) -> None:
 
-        return {"Agendamento cadastrado com Sucesso"}
+        ids_pets = await self.__repository.list_id_pets_by_client(id_client)
 
-    async def __validate_temp_services_in_schedule(self, session: AsyncSession, schedule: ScheduleDTO) -> None:
+        if pet_id not in ids_pets:
+            raise HttpUnauthorized(f"O pet informado não é um pet do cliente {id_client}") 
 
-        temp_total_in_minutes = await self.repository.duration_services_in_schedule(session, schedule.list_services)
+    async def __validate_temp_services_in_schedule(self, schedule: ScheduleDTO) -> None:
+
+        temp_total_in_minutes = await self.__repository.duration_services_in_schedule(schedule.list_services)
 
         if temp_total_in_minutes > 120:
             raise HttpUnauthorized("Quantidade total de tempo dos serviços extrapola a quantidade total permitida.")
@@ -66,11 +69,11 @@ class ScheduleCreateUseCase(InterfaceScheduleCreateUsecase):
         if total_services > 3:
             raise HttpUnauthorized("Só são permitidos 3 serviços por agendamento!")
 
-    async def __validate_schedule_conflicts(self, session: AsyncSession, schedule: ScheduleDTO) -> None:
+    async def __validate_schedule_conflicts(self, schedule: ScheduleDTO) -> None:
 
-        existing_schedules = await self.repository.find_schedules_by_date(session, schedule.date_schedule)
+        existing_schedules = await self.__repository.find_schedules_by_date(schedule.date_schedule)
         
-        new_schedule_duration = await self.repository.duration_services_in_schedule(session, schedule.list_services)
+        new_schedule_duration = await self.__repository.duration_services_in_schedule(schedule.list_services)
         
         new_start_time = datetime.combine(schedule.date_schedule, schedule.time_schedule)
 
@@ -80,9 +83,9 @@ class ScheduleCreateUseCase(InterfaceScheduleCreateUsecase):
             
             existing_start = datetime.combine(existing.date_schedule, existing.time_schedule)
             
-            existing_service_ids = await self.repository.get_service_ids_from_schedule(session, str(existing.id))
+            existing_service_ids = await self.__repository.get_service_ids_from_schedule(str(existing.id))
             
-            existing_duration = await self.repository.duration_services_in_schedule(session, existing_service_ids)
+            existing_duration = await self.__repository.duration_services_in_schedule(existing_service_ids)
 
             existing_end = existing_start + timedelta(minutes=existing_duration)
             
@@ -115,3 +118,9 @@ class ScheduleCreateUseCase(InterfaceScheduleCreateUsecase):
             return True
             
         return False
+    
+    async def __register_schedule_informations(self, pet: ScheduleDTO) -> Dict:
+
+        await self.__repository.create_schedule(pet)
+
+        return {"mensagem": "Agendamento cadastrado com Sucesso"}

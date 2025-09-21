@@ -7,10 +7,10 @@ from src.presentation.http_types.http_request import HttpRequest
 
 async def client_create_composer(session: AsyncSession, http_request: HttpRequest):
 
-    repository = ClientRepository()
+    repository = ClientRepository(session)
 
     use_case = CreateClientUseCase(repository)
 
     controller = ClientCreateController(use_case)
 
-    return await controller.handle(session, http_request)
+    return await controller.handle(http_request)

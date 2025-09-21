@@ -7,10 +7,10 @@ from src.presentation.http_types.http_request import HttpRequest
 
 async def service_delete_composer(session: AsyncSession, http_request: HttpRequest):
 
-    repository = ServiceRepository()
+    repository = ServiceRepository(session)
 
     use_case = ServiceDeleteUseCase(repository)
 
     controller = ServiceDeleteController(use_case)
 
-    return await controller.handle(session, http_request)
+    return await controller.handle(http_request)

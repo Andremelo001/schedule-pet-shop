@@ -18,6 +18,8 @@ config = context.config
 
 # Carregar variáveis do .env
 load_dotenv()
+# Carregar .env.local se existir (sobrescreve configurações para desenvolvimento local)
+load_dotenv('.env.local', override=True)
 
 database_url = os.getenv("DATABASE_URL")
 

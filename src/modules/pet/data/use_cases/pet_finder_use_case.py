@@ -1,4 +1,3 @@
-from sqlalchemy.ext.asyncio import AsyncSession
 from src.modules.pet.data.interfaces.interface_pet_repository import InterfacePetRepository
 from src.modules.pet.domain.use_cases.interface_pet_finder import InterfaceFinderPet
 from src.modules.pet.domain.models.pet import Pet
@@ -8,11 +7,11 @@ from src.errors.error_handler import HttpNotFoundError
 
 class PetFinderUseCase(InterfaceFinderPet):
     def __init__(self, repository: InterfacePetRepository):
-        self.repository = repository
+        self.__repository = repository
 
-    async def finder(self, session: AsyncSession, id_pet: str) -> Dict:
+    async def finder(self, id_pet: str) -> Dict:
 
-        pet = await self.repository.get_pet(session, id_pet)
+        pet = await self.__repository.get_pet(id_pet)
 
         if not pet:
             raise HttpNotFoundError(f"Pet com o id {id_pet} não encontrado")

@@ -7,10 +7,10 @@ from src.presentation.http_types.http_request import HttpRequest
 
 async def service_list_composer(session: AsyncSession, http_request: HttpRequest):
 
-    repository = ServiceRepository()
+    repository = ServiceRepository(session)
 
     use_case = ServiceListUseCase(repository)
 
     controller = ServiceListController(use_case)
 
-    return await controller.handle(session, http_request)
+    return await controller.handle(http_request)

@@ -7,10 +7,10 @@ from src.presentation.http_types.http_request import HttpRequest
 
 async def schedule_list_composer(session: AsyncSession, http_request: HttpRequest):
 
-    repository = ScheduleRepository()
+    repository = ScheduleRepository(session)
 
     use_case = ScheduleListUseCase(repository)
 
     controller = ScheduleListController(use_case)
 
-    return await controller.handle(session, http_request)
+    return await controller.handle(http_request)

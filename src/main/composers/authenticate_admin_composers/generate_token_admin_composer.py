@@ -7,11 +7,11 @@ from src.presentation.http_types.http_request import HttpRequest
 
 async def generate_token_admin_composer(session: AsyncSession, http_request: HttpRequest):
 
-    repository = AdminRepository()
+    repository = AdminRepository(session)
 
     use_case = AutheticateAdminUseCase(repository)
 
     controller = GenerateTokenAdminController(use_case)
 
-    return await controller.handle(session, http_request)
+    return await controller.handle(http_request)
 

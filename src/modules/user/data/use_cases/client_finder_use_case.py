@@ -1,5 +1,4 @@
 import re
-from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Dict
 
 from src.modules.user.domain.use_cases.interface_client_finder import InterfaceClientFinder
@@ -10,13 +9,13 @@ from src.errors.types_errors import HttpNotFoundError, HttpBadRequestError
 
 class ClientFinderUseCase(InterfaceClientFinder):
     def __init__(self, repository: InterfaceClientRepository) -> None:
-        self.repository = repository
+        self.__repository = repository
 
-    async def find(self, session: AsyncSession, cpf_client: str) -> Dict:
+    async def find(self, cpf_client: str) -> Dict:
 
         cpf_client = self.validate_cpf(cpf_client)
 
-        client = await self.__find_client(session, cpf_client)
+        client = await self.__find_client(cpf_client)
 
         return self.__format_response(client)
     
@@ -56,8 +55,8 @@ class ClientFinderUseCase(InterfaceClientFinder):
                 "senha": client.senha
             }
         
-    async def __find_client(self, session: AsyncSession, cpf_client: str) -> Client:
-        client = await self.repository.get_client(session, cpf_client)
+    async def __find_client(self, cpf_client: str) -> Client:
+        client = await self.__repository.get_client(cpf_client)
 
         if not client:
             raise HttpNotFoundError(f"Nenhum cliente encontrado com o cpf {cpf_client}")

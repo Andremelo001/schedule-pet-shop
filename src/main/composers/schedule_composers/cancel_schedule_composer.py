@@ -7,10 +7,10 @@ from src.presentation.http_types.http_request import HttpRequest
 
 async def cancel_schedule(session: AsyncSession, http_request: HttpRequest):
 
-    repository = ScheduleRepository()
+    repository = ScheduleRepository(session)
 
     use_case = CancelScheduleUseCase(repository)
 
     controller = CancelScheduleController(use_case)
 
-    return await controller.handle(session, http_request)
+    return await controller.handle(http_request)

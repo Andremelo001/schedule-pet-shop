@@ -1,6 +1,5 @@
 import re
 from typing import Dict
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.modules.user.domain.use_cases.interface_client_create import InterfaceClientCreate
 from src.modules.user.data.interfaces.interface_client_repository import InterfaceClientRepository
@@ -13,11 +12,11 @@ from src.errors.types_errors import HttpBadRequestError, HttpConflitError
 
 class CreateClientUseCase(InterfaceClientCreate):
     def __init__(self, repository: InterfaceClientRepository):
-        self.repository = repository
+        self.__repository = repository
 
-    async def create(self, session: AsyncSession, client: ClientDTO) -> Dict:
+    async def create(self, client: ClientDTO) -> Dict:
 
-        await self.__client_exists(session, client.cpf)
+        await self.__client_exists(client.cpf)
         
         self.validate_email(client.email)
 
@@ -27,7 +26,7 @@ class CreateClientUseCase(InterfaceClientCreate):
 
         client.cpf = self.format_cpf(client.cpf)
 
-        return await self.__register_client_informations(session, client)
+        return await self.__register_client_informations(client)
 
     @classmethod
     def validate_email(cls, email: str) -> None:
@@ -55,13 +54,13 @@ class CreateClientUseCase(InterfaceClientCreate):
 
         return ClientFinderUseCase.validate_cpf(cpf_client)
 
-    async def __client_exists(self, session: AsyncSession, cpf: str) -> None:
-        client_exists = await self.repository.get_client(session, cpf)
+    async def __client_exists(self, cpf: str) -> None:
+        client_exists = await self.__repository.get_client(cpf)
 
         if client_exists:
             raise HttpConflitError(f"Cliente com o cpf {cpf} já existe")
         
-    async def __register_client_informations(self, session: AsyncSession, client: ClientDTO) -> Dict:
-        await self.repository.create_client(session, client)
+    async def __register_client_informations(self, client: ClientDTO) -> Dict:
+        await self.__repository.create_client(client)
 
         return {"message": "Cliente cadastrado com sucesso"}

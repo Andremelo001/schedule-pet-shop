@@ -1,4 +1,3 @@
-from sqlalchemy.ext.asyncio import AsyncSession
 from abc import ABC, abstractmethod
 from typing import List
 
@@ -10,28 +9,28 @@ from src.modules.schedule.domain.models.schedule import Schedule
 class InterfaceClientRepository(ABC):
 
     @abstractmethod
-    async def get_client_by_id(cls, session: AsyncSession, id_client: str) -> Client: pass
+    async def get_client_by_id(self, id_client: str) -> Client: pass
 
     @abstractmethod
-    async def get_client_with_pets_and_schedules_by_id(cls, session: AsyncSession, id_client: str) -> ClientWithPetsWithSchedules: pass
+    async def get_client_with_pets_and_schedules_by_id(self, id_client: str) -> ClientWithPetsWithSchedules: pass
 
     @abstractmethod
-    async def get_client(cls, session: AsyncSession, cpf_client: str) -> Client: pass
+    async def get_client(self, cpf_client: str) -> Client: pass
 
     @abstractmethod
-    async def get_client_by_email(cls, session: AsyncSession, email: str) -> Client: pass
+    async def get_client_by_email(self, email: str) -> Client: pass
 
     @abstractmethod
-    async def create_client(cls, session: AsyncSession, client: ClientDTO) -> Client: pass
+    async def create_client(self, client: ClientDTO) -> Client: pass
 
     @abstractmethod
-    async def update_client(cls, session: AsyncSession, id_client: str, client: ClientUpdateDTO) -> Client: pass
+    async def update_client(self, id_client: str, client: ClientUpdateDTO) -> Client: pass
 
     @abstractmethod
-    async def delete_client(cls, session: AsyncSession, id_client: str) -> None: pass
+    async def delete_client(self, id_client: str) -> None: pass
 
     @abstractmethod
-    async def find_schedule_by_id_client(cls, session: AsyncSession, id_client: str) -> List[Schedule]: pass
+    async def find_schedule_by_id_client(self, id_client: str) -> List[Schedule]: pass
 
         
 

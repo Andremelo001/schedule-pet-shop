@@ -1,4 +1,3 @@
-from sqlalchemy.ext.asyncio import AsyncSession
 from src.modules.schedule.domain.use_cases.interface_schedule_create import InterfaceScheduleCreateUsecase
 from src.presentation.interfaces.controller_interface import ControllerInterface
 from src.presentation.http_types.http_request import HttpRequest
@@ -7,9 +6,9 @@ from src.modules.schedule.dto.schedule_dto import ScheduleDTO
 
 class ScheduleCreateController(ControllerInterface):
     def __init__(self, use_case: InterfaceScheduleCreateUsecase):
-        self.use_case = use_case
+        self.__use_case = use_case
         
-    async def handle(self, session: AsyncSession, http_request: HttpRequest) -> HttpResponse:
+    async def handle(self, http_request: HttpRequest) -> HttpResponse:
 
         date_schedule = http_request.body["date_schedule"]
         time_schedule = http_request.body["time_schedule"]
@@ -25,7 +24,7 @@ class ScheduleCreateController(ControllerInterface):
             list_services=list_services
         )
 
-        response = await self.use_case.create(session, schedule)
+        response = await self.__use_case.create(schedule)
 
         return HttpResponse(
             status_code=200,

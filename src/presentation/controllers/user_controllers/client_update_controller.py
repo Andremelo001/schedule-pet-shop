@@ -1,4 +1,3 @@
-from sqlalchemy.ext.asyncio import AsyncSession
 from src.presentation.interfaces.controller_interface import ControllerInterface
 from src.modules.user.domain.use_cases.interface_client_update import InterfaceClientUpdate
 from src.modules.user.dto.client_dto import ClientUpdateDTO
@@ -7,9 +6,9 @@ from src.presentation.http_types.http_response import HttpResponse
 
 class ClientUpdateController(ControllerInterface):
     def __init__(self, use_case: InterfaceClientUpdate):
-        self.use_case = use_case
+        self.__use_case = use_case
 
-    async def handle(self, session: AsyncSession, http_request: HttpRequest) -> HttpResponse:
+    async def handle(self, http_request: HttpRequest) -> HttpResponse:
         
         id_client = http_request.query_params["id_client"]
 
@@ -17,7 +16,7 @@ class ClientUpdateController(ControllerInterface):
 
         new_client = ClientUpdateDTO(**update_data)
 
-        response = await self.use_case.update(session, id_client, new_client)
+        response = await self.__use_case.update(id_client, new_client)
 
         return HttpResponse(
             status_code=200,

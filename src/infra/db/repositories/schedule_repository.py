@@ -10,19 +10,20 @@ from src.modules.schedule.domain.models.schedule import Schedule
 from src.modules.schedule.data.interfaces.interface_schedule_repository import InterfaceScheduleRepository
 from src.infra.db.entities.services import Services
 from src.infra.db.entities.schedule import Schedule as ScheduleEntitie, ScheduleServices
-
+from src.infra.db.entities.pet import Pet
 from src.infra.db.entities.client import Client
 
 class ScheduleRepository(InterfaceScheduleRepository):
+    def __init__(self, session: AsyncSession):
+        self.__session = session
 
-    @classmethod
-    async def create_schedule(cls, session: AsyncSession, schedule: ScheduleDTO) -> None:
+    async def create_schedule(self, schedule: ScheduleDTO) -> None:
 
         price_total = 0
 
         for id_service in schedule.list_services:
 
-           service = (await session.execute(select(Services).where(Services.id == id_service))).scalar_one_or_none()
+           service = (await self.__session.execute(select(Services).where(Services.id == id_service))).scalar_one_or_none()
 
            price_total += service.price
 
@@ -38,87 +39,78 @@ class ScheduleRepository(InterfaceScheduleRepository):
                 pet_id= schedule.id_pet
             )
 
-            session.add(new_schedule)
-            await session.commit()
-            await session.refresh(new_schedule)
+            self.__session.add(new_schedule)
+            await self.__session.commit()
+            await self.__session.refresh(new_schedule)
 
             for id_service in schedule.list_services:
 
                 association = ScheduleServices(schedule_id=new_schedule.id, services_id=id_service)
 
-                session.add(association)
+                self.__session.add(association)
             
-            await session.commit()
+            await self.__session.commit()
 
         except Exception as exception:
-            await session.rollback()
+            await self.__session.rollback()
             raise exception
         
-    @classmethod
-    async def find_email_client_by_id_schedule(cls, session: AsyncSession, id_schedule: str) -> str:
+    async def find_email_client_by_id_schedule(self, id_schedule: str) -> str:
 
-        result = await session.execute(select(Client.email).join(ScheduleEntitie, ScheduleEntitie.client_id == Client.id).where(ScheduleEntitie.id == id_schedule))
+        result = await self.__session.execute(select(Client.email).join(ScheduleEntitie, ScheduleEntitie.client_id == Client.id).where(ScheduleEntitie.id == id_schedule))
         
         return result.scalar_one_or_none()
         
-    @classmethod
-    async def find_schedule_by_id(cls, session: AsyncSession, id_schedule: str) -> Schedule:
+    async def find_schedule_by_id(self, id_schedule: str) -> Schedule:
 
-        schedule = (await session.execute(select(ScheduleEntitie).where(ScheduleEntitie.id == id_schedule))).scalar_one_or_none()
+        schedule = (await self.__session.execute(select(ScheduleEntitie).where(ScheduleEntitie.id == id_schedule))).scalar_one_or_none()
 
         return schedule
     
-    @classmethod
-    async def list_schedules(cls, session: AsyncSession) -> List[Schedule]:
+    async def list_schedules(self) -> List[Schedule]:
 
-        return (await session.execute(select(ScheduleEntitie).options(selectinload(ScheduleEntitie.services)))).scalars().all()
+        return (await self.__session.execute(select(ScheduleEntitie).options(selectinload(ScheduleEntitie.services)))).scalars().all()
 
-    @classmethod
-    async def find_schedule_by_id_client(cls, session: AsyncSession, id_client: str) -> List[Schedule]:
+    async def find_schedule_by_id_client(self, id_client: str) -> List[Schedule]:
 
-        return (await session.execute(select(ScheduleEntitie).where(ScheduleEntitie.client_id == id_client))).scalars().all()
+        return (await self.__session.execute(select(ScheduleEntitie).where(ScheduleEntitie.client_id == id_client))).scalars().all()
 
-    @classmethod
-    async def cancel_schedule(cls, session: AsyncSession, id_schedule: str) -> None:
+    async def cancel_schedule(self, id_schedule: str) -> None:
 
-        schedule = (await session.execute(select(ScheduleEntitie).where(ScheduleEntitie.id == id_schedule))).scalar_one_or_none()
+        schedule = (await self.__session.execute(select(ScheduleEntitie).where(ScheduleEntitie.id == id_schedule))).scalar_one_or_none()
 
         schedule.schedule_active = False
 
-        session.add(schedule)
-        await session.commit()
-        await session.refresh(schedule)
+        self.__session.add(schedule)
+        await self.__session.commit()
+        await self.__session.refresh(schedule)
 
-    @classmethod
-    async def find_schedules_available(cls, session: AsyncSession) -> List[Schedule]:
+    async def find_schedules_available(self) -> List[Schedule]:
 
-        return (await session.execute(select(ScheduleEntitie).options(selectinload(ScheduleEntitie.services)).where(ScheduleEntitie.schedule_active == True))).scalars().all()
+        return (await self.__session.execute(select(ScheduleEntitie).options(selectinload(ScheduleEntitie.services)).where(ScheduleEntitie.schedule_active == True))).scalars().all()
 
-    @classmethod
-    async def delete_schedule(cls, session: AsyncSession, id_schedule: str) -> None:
+    async def delete_schedule(self, id_schedule: str) -> None:
 
-        schedule = (await session.execute(select(ScheduleEntitie).where(ScheduleEntitie.id == id_schedule))).scalar_one_or_none()
+        schedule = (await self.__session.execute(select(ScheduleEntitie).where(ScheduleEntitie.id == id_schedule))).scalar_one_or_none()
 
-        await session.delete(schedule)
-        await session.commit()
+        await self.__session.delete(schedule)
+        await self.__session.commit()
     
-    @classmethod
-    async def duration_services_in_schedule(cls, session: AsyncSession, list_services: List[str]) -> int:
+    async def duration_services_in_schedule(self, list_services: List[str]) -> int:
 
         temp_total = 0
 
         for id_service in list_services:
 
-           service = (await session.execute(select(Services).where(Services.id == id_service))).scalar_one_or_none()
+           service = (await self.__session.execute(select(Services).where(Services.id == id_service))).scalar_one_or_none()
 
            temp_total += service.duration_in_minutes
         
         return temp_total
 
-    @classmethod
-    async def get_service_ids_from_schedule(cls, session: AsyncSession, schedule_id: str) -> List[str]:
+    async def get_service_ids_from_schedule(self, schedule_id: str) -> List[str]:
         
-        result = await session.execute(
+        result = await self.__session.execute(
             select(ScheduleServices.services_id)
             .where(ScheduleServices.schedule_id == schedule_id)
         )
@@ -126,11 +118,16 @@ class ScheduleRepository(InterfaceScheduleRepository):
         service_ids = result.scalars().all()
         return [str(service_id) for service_id in service_ids]
 
-    @classmethod
-    async def find_schedules_by_date(cls, session: AsyncSession, date_schedule: date) -> List[Schedule]:
+    async def find_schedules_by_date(self, date_schedule: date) -> List[Schedule]:
         
-        return (await session.execute(
+        return (await self.__session.execute(
             select(ScheduleEntitie)
             .where(ScheduleEntitie.date_schedule == date_schedule)
             .where(ScheduleEntitie.schedule_active == True)
         )).scalars().all()
+    
+    async def list_id_pets_by_client(self, id_client: str) -> List[str]:
+        
+        pets = (await self.__session.execute(select(Pet).where(Pet.client_id == id_client))).scalars().all()
+
+        return [str(pet.id) for pet in pets]

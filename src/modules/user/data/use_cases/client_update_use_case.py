@@ -1,4 +1,3 @@
-from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Dict
 
 from src.modules.user.domain.use_cases.interface_client_update import InterfaceClientUpdate
@@ -11,33 +10,33 @@ from src.errors.types_errors import HttpConflitError, HttpNotFoundError
 
 class ClientUpdateUseCase(InterfaceClientUpdate):
     def __init__(self, repository: InterfaceClientRepository):
-        self.repository = repository
+        self.__repository = repository
 
-    async def update(self, session: AsyncSession, id_client: str, client: ClientUpdateDTO) -> Dict:
+    async def update(self, id_client: str, client: ClientUpdateDTO) -> Dict:
 
-        await self.__client_not_found(session, id_client)
+        await self.__client_not_found(id_client)
 
         if client.cpf is not None:
-            await self.__client_exists(session, client.cpf, id_client)
+            await self.__client_exists(client.cpf, id_client)
 
             client.cpf = self.__format_cpf(client.cpf)
 
-        new_client = await self.repository.update_client(session, id_client, client)
+        new_client = await self.__repository.update_client(id_client, client)
     
         return self.__format_response(new_client)
     
 
-    async def __client_not_found(self, session: AsyncSession, id_client: str):
+    async def __client_not_found(self, id_client: str):
 
-        client = await self.repository.get_client_by_id(session, id_client)
+        client = await self.__repository.get_client_by_id(id_client)
 
         if not client:
             raise HttpNotFoundError(f"Cliente com o id {id_client} não encontrado")
 
     
-    async def __client_exists(self, session: AsyncSession, cpf: str, id_client: str) -> None:
+    async def __client_exists(self, cpf: str, id_client: str) -> None:
 
-        client = await self.repository.get_client(session, cpf)
+        client = await self.__repository.get_client(cpf)
 
         if client and str(client.id) != id_client:
             raise HttpConflitError(f"Cliente com o cpf {cpf} já existe")
