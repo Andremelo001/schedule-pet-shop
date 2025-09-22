@@ -14,7 +14,15 @@ async def lifespan(app: FastAPI):
 
 
 # Inicializa o aplicativo FastAPI
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    lifespan=lifespan,
+    title="Schedule Pet Shop API",
+    description="API para Sistema de Agendamento de Pet Shop",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_url="/openapi.json"
+)
 
 
 # Rotas para Endpoints

@@ -13,6 +13,9 @@ async def test_create_client_success(mocker):
 
     # Mock que não existe clientes cadastrados com o cpf
     mock_repository.get_client.return_value = None
+    
+    # Mock que não existe clientes cadastrados com o email
+    mock_repository.get_client_by_email.return_value = None
 
     # Mock do PasswordHasher
     with patch('src.modules.user.data.use_cases.client_create_use_case.PasswordHasher') as mock_password_hasher:
@@ -39,6 +42,9 @@ async def test_create_client_success(mocker):
 
             # Verificar se o CPF foi usado para verificar existência (sem formatação)
             mock_repository.get_client.assert_called_once_with( "12345678909")
+            
+            # Verificar se o email foi usado para verificar existência
+            mock_repository.get_client_by_email.assert_called_once_with("andre@gmail.com")
             
             # Verificar se o cliente foi criado no repositório
             mock_repository.create_client.assert_called_once_with( client)
@@ -75,11 +81,43 @@ async def test_client_already_exists(mocker):
     mock_repository.get_client.assert_called_once_with( "12345678909")
 
 @pytest.mark.asyncio
+async def test_email_already_exists(mocker):
+
+    mock_repository = AsyncMock()
+
+    # Mock que não existe cliente com o CPF
+    mock_repository.get_client.return_value = None
+    
+    # Mock que existe um cliente com esse email
+    fake_client = Client(id="client-id-123")
+    mock_repository.get_client_by_email.return_value = fake_client
+
+    use_case = CreateClientUseCase(mock_repository)
+
+    client = ClientDTO(
+        name="Andre",
+        cpf="12345678909",
+        age=20,
+        email="andre@gmail.com",
+        senha="Senha123"
+    )
+
+    with pytest.raises(HttpConflitError, match="Já existe um cliente cadastrado com esse email"):
+        await use_case.create( client)
+
+    # Verificar se foi chamado para verificar existência do CPF
+    mock_repository.get_client.assert_called_once_with( "12345678909")
+    
+    # Verificar se foi chamado para verificar existência do email
+    mock_repository.get_client_by_email.assert_called_once_with("andre@gmail.com")
+
+@pytest.mark.asyncio
 async def test_invalid_email(mocker):
 
     mock_repository = AsyncMock()
 
     mock_repository.get_client.return_value = None
+    mock_repository.get_client_by_email.return_value = None
 
     use_case = CreateClientUseCase(mock_repository)
 
@@ -94,8 +132,11 @@ async def test_invalid_email(mocker):
     with pytest.raises(HttpBadRequestError, match="O e-mail informado não é válido! Exemplo: ex@gmail.com"):
         await use_case.create( client)
 
-    # Verificar se foi chamado para verificar existência antes da validação do email
+    # Verificar se foi chamado para verificar existência do CPF antes da validação do email
     mock_repository.get_client.assert_called_once_with( "12345678909")
+    
+    # Verificar se foi chamado para verificar existência do email antes da validação do email
+    mock_repository.get_client_by_email.assert_called_once_with("andre.com")
 
 @pytest.mark.asyncio
 async def test_invalid_senha(mocker):
@@ -103,6 +144,7 @@ async def test_invalid_senha(mocker):
     mock_repository = AsyncMock()
 
     mock_repository.get_client.return_value = None
+    mock_repository.get_client_by_email.return_value = None
 
     use_case = CreateClientUseCase(mock_repository)
 
@@ -117,7 +159,10 @@ async def test_invalid_senha(mocker):
     with pytest.raises(HttpBadRequestError, match="A senha deve conter pelo menos uma letra maiúscula, um número e ter no mínimo 8 caracteres"):
         await use_case.create( client)
 
-    # Verificar se foi chamado para verificar existência antes da validação da senha
+    # Verificar se foi chamado para verificar existência do CPF antes da validação da senha
     mock_repository.get_client.assert_called_once_with( "12345678909")
+    
+    # Verificar se foi chamado para verificar existência do email antes da validação da senha
+    mock_repository.get_client_by_email.assert_called_once_with("andre@gmail.com")
 
 

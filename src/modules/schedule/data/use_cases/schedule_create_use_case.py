@@ -76,48 +76,143 @@ class ScheduleCreateUseCase(InterfaceScheduleCreateUsecase):
         new_schedule_duration = await self.__repository.duration_services_in_schedule(schedule.list_services)
         
         new_start_time = datetime.combine(schedule.date_schedule, schedule.time_schedule)
-
         new_end_time = new_start_time + timedelta(minutes=new_schedule_duration)
         
+        # Verificar se há conflito com agendamentos existentes
+        has_conflict = await self.__check_schedule_conflict(new_start_time, new_end_time, existing_schedules)
+        
+        if has_conflict:
+            available_intervals = await self.__get_available_time_intervals(schedule.date_schedule, existing_schedules)
+            intervals_text = self.__format_available_intervals(available_intervals)
+            raise HttpUnauthorized(
+                f"Horário não disponível. Intervalos disponíveis no dia: {intervals_text}"
+            )
+
+    async def __check_schedule_conflict(self, new_start: datetime, new_end: datetime, existing_schedules: List) -> bool:
+        """Verifica se há conflito com agendamentos existentes"""
+        
         for existing in existing_schedules:
-            
             existing_start = datetime.combine(existing.date_schedule, existing.time_schedule)
             
             existing_service_ids = await self.__repository.get_service_ids_from_schedule(str(existing.id))
-            
             existing_duration = await self.__repository.duration_services_in_schedule(existing_service_ids)
-
             existing_end = existing_start + timedelta(minutes=existing_duration)
             
-            blocked_until = self.__calculate_next_available_slot(existing_end)
-            
-            if self.__has_time_conflict(new_start_time, new_end_time, existing_start, blocked_until):
-                next_available = blocked_until.strftime("%H:%M")
-                raise HttpUnauthorized(
-                    f"Horário não disponível. O próximo horário disponível é às {next_available}."
-                )
-
-    @classmethod
-    def __calculate_next_available_slot(cls, end_time: datetime) -> datetime:
-
-        if end_time.minute == 0:
-            return end_time
-        
-        next_hour = end_time.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
-
-        return next_hour
-
-    @classmethod
-    def __has_time_conflict(cls, new_start: datetime, new_end: datetime, 
-                          existing_start: datetime, blocked_until: datetime) -> bool:
-
-        if new_start < blocked_until:
-            return True
-        
-        if new_start < existing_start and new_end > existing_start:
-            return True
-            
+            # Verifica se há sobreposição de horários
+            if (new_start < existing_end and new_end > existing_start):
+                return True
+                
         return False
+
+    async def __get_available_time_intervals(self, schedule_date: date, existing_schedules: List) -> List[tuple]:
+        """Calcula os intervalos de tempo disponíveis no dia"""
+        
+        # Horários de funcionamento
+        morning_start = datetime.combine(schedule_date, time(8, 0))
+        morning_end = datetime.combine(schedule_date, time(12, 0))
+        afternoon_start = datetime.combine(schedule_date, time(14, 0))
+        afternoon_end = datetime.combine(schedule_date, time(18, 0))
+        
+        # Coletar todos os intervalos ocupados
+        occupied_intervals = []
+        
+        for existing in existing_schedules:
+            existing_start = datetime.combine(existing.date_schedule, existing.time_schedule)
+            
+            existing_service_ids = await self.__repository.get_service_ids_from_schedule(str(existing.id))
+            existing_duration = await self.__repository.duration_services_in_schedule(existing_service_ids)
+            existing_end = existing_start + timedelta(minutes=existing_duration)
+            
+            occupied_intervals.append((existing_start, existing_end))
+        
+        # Ordenar intervalos ocupados por horário de início
+        occupied_intervals.sort(key=lambda x: x[0])
+        
+        # Calcular intervalos disponíveis
+        available_intervals = []
+        
+        # Verificar período da manhã
+        morning_intervals = self.__calculate_free_intervals_in_period(morning_start, morning_end, occupied_intervals)
+        available_intervals.extend(morning_intervals)
+        
+        # Verificar período da tarde
+        afternoon_intervals = self.__calculate_free_intervals_in_period(afternoon_start, afternoon_end, occupied_intervals)
+        available_intervals.extend(afternoon_intervals)
+        
+        # Ajustar intervalos para horários cheios (sem minutos quebrados)
+        adjusted_intervals = self.__adjust_intervals_to_full_hours(available_intervals)
+        
+        return adjusted_intervals
+
+    @classmethod
+    def __calculate_free_intervals_in_period(cls, period_start: datetime, period_end: datetime, 
+                                           occupied_intervals: List[tuple]) -> List[tuple]:
+        """Calcula intervalos livres dentro de um período específico"""
+        
+        free_intervals = []
+        current_time = period_start
+        
+        for occupied_start, occupied_end in occupied_intervals:
+            # Se o agendamento está fora do período, pular
+            if occupied_end <= period_start or occupied_start >= period_end:
+                continue
+                
+            # Ajustar os limites do agendamento para dentro do período
+            adjusted_start = max(occupied_start, period_start)
+            adjusted_end = min(occupied_end, period_end)
+            
+            # Se há tempo livre antes do agendamento
+            if current_time < adjusted_start:
+                free_intervals.append((current_time, adjusted_start))
+            
+            # Atualizar tempo atual para após o agendamento
+            current_time = max(current_time, adjusted_end)
+        
+        # Se há tempo livre após o último agendamento
+        if current_time < period_end:
+            free_intervals.append((current_time, period_end))
+            
+        return free_intervals
+
+    @classmethod
+    def __adjust_intervals_to_full_hours(cls, intervals: List[tuple]) -> List[tuple]:
+        """Ajusta os intervalos para começar e terminar apenas em horários cheios (sem minutos)"""
+        
+        adjusted_intervals = []
+        
+        for start, end in intervals:
+            # Ajustar início para a próxima hora cheia se tiver minutos
+            if start.minute > 0:
+                adjusted_start = start.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
+            else:
+                adjusted_start = start
+            
+            # Ajustar fim para a hora cheia anterior se tiver minutos
+            if end.minute > 0:
+                adjusted_end = end.replace(minute=0, second=0, microsecond=0)
+            else:
+                adjusted_end = end
+            
+            # Só adicionar se o intervalo ajustado ainda é válido (início antes do fim)
+            if adjusted_start < adjusted_end:
+                adjusted_intervals.append((adjusted_start, adjusted_end))
+                
+        return adjusted_intervals
+
+    @classmethod
+    def __format_available_intervals(cls, intervals: List[tuple]) -> str:
+        """Formata os intervalos disponíveis para exibição"""
+        
+        if not intervals:
+            return "Nenhum horário disponível no dia"
+        
+        formatted_intervals = []
+        for start, end in intervals:
+            start_str = start.strftime("%H:%M")
+            end_str = end.strftime("%H:%M")
+            formatted_intervals.append(f"{start_str} às {end_str}")
+        
+        return ", ".join(formatted_intervals)
     
     async def __register_schedule_informations(self, pet: ScheduleDTO) -> Dict:
 

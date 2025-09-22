@@ -17,6 +17,8 @@ class CreateClientUseCase(InterfaceClientCreate):
     async def create(self, client: ClientDTO) -> Dict:
 
         await self.__client_exists(client.cpf)
+
+        await self.__email_exists(client.email)
         
         self.validate_email(client.email)
 
@@ -59,6 +61,14 @@ class CreateClientUseCase(InterfaceClientCreate):
 
         if client_exists:
             raise HttpConflitError(f"Cliente com o cpf {cpf} já existe")
+    
+    async def __email_exists(self, email: str,) -> None:
+
+        client = await self.__repository.get_client_by_email(email)
+
+        if client:
+            raise HttpConflitError("Já existe um cliente cadastrado com esse email")
+
         
     async def __register_client_informations(self, client: ClientDTO) -> Dict:
         await self.__repository.create_client(client)

@@ -73,6 +73,14 @@ async def delete_service(request: Request, session: AsyncSession = Depends(db.ge
 
 @router.put("/update", response_model=Dict, openapi_extra={
         "security": [{"BearerAuth": []}],
+        "parameters": [
+            {
+                "name": "id_service",
+                "in": "query",
+                "required": True,
+                "schema": {"type": "string"},
+            }
+        ],
         "requestBody": {
             "content": {
                 "application/json": {

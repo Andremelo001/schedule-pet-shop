@@ -69,6 +69,14 @@ async def get_client(request: Request, session: AsyncSession = Depends(db.get_se
 
 @router.put("/update", response_model=Dict, openapi_extra={
         "security": [{"BearerAuth": []}],
+        "parameters": [
+            {
+                "name": "id_client",
+                "in": "query",
+                "required": True,
+                "schema": {"type": "string"},
+            }
+        ],
         "requestBody": {
             "content": {
                 "application/json": {

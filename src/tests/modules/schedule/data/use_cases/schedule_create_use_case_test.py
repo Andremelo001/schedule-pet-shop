@@ -167,15 +167,13 @@ async def test_create_schedule_time_conflict(mocker):
     existing_schedule.time_schedule = time(8, 0)
 
     mock_repository.list_id_pets_by_client.return_value = ["pet-123"]  # Mock pet validation
-
-
     mock_repository.duration_services_in_schedule.return_value = 60
     mock_repository.find_schedules_by_date.return_value = [existing_schedule]
     mock_repository.get_service_ids_from_schedule.return_value = ["existing-service"]
 
     use_case = ScheduleCreateUseCase(mock_repository)
 
-    with pytest.raises(HttpUnauthorized, match="Horário não disponível. O próximo horário disponível é às"):
+    with pytest.raises(HttpUnauthorized, match="Horário não disponível. Intervalos disponíveis no dia:"):
         await use_case.create( schedule_dto)
 
 
@@ -233,57 +231,72 @@ async def test_create_schedule_valid_working_hours_afternoon(mocker):
         assert result == {"mensagem": "Agendamento cadastrado com Sucesso"}
 
 
-def test_calculate_next_available_slot_exact_hour():
-    # Test when end time is exactly on the hour
-    end_time = datetime(2024, 12, 10, 9, 0)
-    result = ScheduleCreateUseCase._ScheduleCreateUseCase__calculate_next_available_slot(end_time)
-    assert result == datetime(2024, 12, 10, 9, 0)
+@pytest.mark.asyncio
+async def test_create_schedule_time_conflict_with_available_intervals(mocker):
+    mock_repository = AsyncMock()
 
-
-def test_calculate_next_available_slot_with_minutes():
-    # Test when end time has minutes
-    end_time = datetime(2024, 12, 10, 9, 30)
-    result = ScheduleCreateUseCase._ScheduleCreateUseCase__calculate_next_available_slot(end_time)
-    assert result == datetime(2024, 12, 10, 10, 0)
-
-
-def test_has_time_conflict_new_before_blocked():
-    # Test conflict when new schedule starts before blocked time
-    new_start = datetime(2024, 12, 10, 8, 0)
-    new_end = datetime(2024, 12, 10, 9, 0)
-    existing_start = datetime(2024, 12, 10, 8, 30)
-    blocked_until = datetime(2024, 12, 10, 9, 30)
-
-    result = ScheduleCreateUseCase._ScheduleCreateUseCase__has_time_conflict(
-        new_start, new_end, existing_start, blocked_until
+    schedule_dto = ScheduleDTO(
+        id_client="client-123",
+        id_pet="pet-123",
+        list_services=["service-1"],
+        date_schedule=date(2024, 12, 10),
+        time_schedule=time(9, 0)  # Trying to schedule at 9:00
     )
-    assert result is True
+
+    # Mock existing schedule that conflicts (8:00-10:00)
+    existing_schedule = MagicMock()
+    existing_schedule.id = "existing-123"
+    existing_schedule.date_schedule = date(2024, 12, 10)
+    existing_schedule.time_schedule = time(8, 0)
+
+    mock_repository.list_id_pets_by_client.return_value = ["pet-123"]
+    mock_repository.find_schedules_by_date.return_value = [existing_schedule]
+    mock_repository.get_service_ids_from_schedule.return_value = ["existing-service"]
+    
+    # Configure different durations for new schedule vs existing schedule
+    def mock_duration(service_list):
+        if service_list == ["service-1"]:  # New schedule
+            return 60  # 1 hour
+        elif service_list == ["existing-service"]:  # Existing schedule
+            return 120  # 2 hours (8:00-10:00)
+        return 60
+    
+    mock_repository.duration_services_in_schedule.side_effect = mock_duration
+
+    use_case = ScheduleCreateUseCase(mock_repository)
+
+    with pytest.raises(HttpUnauthorized, match="Horário não disponível. Intervalos disponíveis no dia:"):
+        await use_case.create(schedule_dto)
+
+    # Verify all necessary methods were called
+    mock_repository.list_id_pets_by_client.assert_called_once_with("client-123")
+    mock_repository.find_schedules_by_date.assert_called_once_with(date(2024, 12, 10))
+    # O método get_service_ids_from_schedule pode ser chamado múltiplas vezes na nova lógica
+    assert mock_repository.get_service_ids_from_schedule.call_count >= 1
 
 
-def test_has_time_conflict_overlap_with_existing():
-    # Test conflict when new schedule overlaps with existing
-    new_start = datetime(2024, 12, 10, 8, 0)
-    new_end = datetime(2024, 12, 10, 9, 0)
-    existing_start = datetime(2024, 12, 10, 8, 30)
-    blocked_until = datetime(2024, 12, 10, 8, 0)
+@pytest.mark.asyncio 
+async def test_create_schedule_no_conflicts_empty_day(mocker):
+    mock_repository = AsyncMock()
 
-    result = ScheduleCreateUseCase._ScheduleCreateUseCase__has_time_conflict(
-        new_start, new_end, existing_start, blocked_until
+    schedule_dto = ScheduleDTO(
+        id_client="client-123",
+        id_pet="pet-123",
+        list_services=["service-1"],
+        date_schedule=date(2024, 12, 10),
+        time_schedule=time(10, 0)
     )
-    assert result is True
 
+    mock_repository.list_id_pets_by_client.return_value = ["pet-123"]
+    mock_repository.duration_services_in_schedule.return_value = 60
+    mock_repository.find_schedules_by_date.return_value = []  # No existing schedules
+    mock_repository.create_schedule.return_value = None
 
-def test_has_time_conflict_no_conflict():
-    # Test no conflict when schedules don't overlap
-    new_start = datetime(2024, 12, 10, 10, 0)
-    new_end = datetime(2024, 12, 10, 11, 0)
-    existing_start = datetime(2024, 12, 10, 8, 0)
-    blocked_until = datetime(2024, 12, 10, 9, 0)
+    use_case = ScheduleCreateUseCase(mock_repository)
+    result = await use_case.create(schedule_dto)
 
-    result = ScheduleCreateUseCase._ScheduleCreateUseCase__has_time_conflict(
-        new_start, new_end, existing_start, blocked_until
-    )
-    assert result is False
+    assert result == {"mensagem": "Agendamento cadastrado com Sucesso"}
+    mock_repository.create_schedule.assert_called_once_with(schedule_dto)
 
 
 def test_validate_time_schedule_valid_times():
@@ -325,3 +338,39 @@ def test_validate_total_services_valid_counts():
     for service_list in valid_service_lists:
         # Should not raise exception
         ScheduleCreateUseCase._ScheduleCreateUseCase__validate_total_services_in_schedule(service_list)
+
+
+def test_format_available_intervals():
+    # Test formatting of available intervals
+    intervals = [
+        (datetime(2024, 12, 10, 8, 0), datetime(2024, 12, 10, 10, 0)),
+        (datetime(2024, 12, 10, 14, 0), datetime(2024, 12, 10, 16, 0))
+    ]
+    
+    result = ScheduleCreateUseCase._ScheduleCreateUseCase__format_available_intervals(intervals)
+    expected = "08:00 às 10:00, 14:00 às 16:00"
+    assert result == expected
+
+
+def test_format_available_intervals_empty():
+    # Test formatting with no available intervals
+    intervals = []
+    
+    result = ScheduleCreateUseCase._ScheduleCreateUseCase__format_available_intervals(intervals)
+    expected = "Nenhum horário disponível no dia"
+    assert result == expected
+
+
+def test_adjust_intervals_to_full_hours():
+    # Test adjustment of intervals to full hours
+    intervals = [
+        (datetime(2024, 12, 10, 8, 30), datetime(2024, 12, 10, 10, 45)),
+        (datetime(2024, 12, 10, 14, 0), datetime(2024, 12, 10, 16, 0))
+    ]
+    
+    result = ScheduleCreateUseCase._ScheduleCreateUseCase__adjust_intervals_to_full_hours(intervals)
+    expected = [
+        (datetime(2024, 12, 10, 9, 0), datetime(2024, 12, 10, 10, 0)),
+        (datetime(2024, 12, 10, 14, 0), datetime(2024, 12, 10, 16, 0))
+    ]
+    assert result == expected
