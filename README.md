@@ -277,7 +277,7 @@ POSTGRES_USER=petshop
 POSTGRES_PASSWORD=sua_senha_segura
 POSTGRES_PORT=5432
 
-DATABASE_URL="postgresql+asyncpg://petshop:sua_senha_segura@db:5432/db_petshop"
+DATABASE_URL="postgresql+asyncpg://petshop:sua_senha_segura@localhost:5432/db_petshop"
 DATABASE_URL_DOCKER="postgresql+asyncpg://petshop:sua_senha_segura@db:5432/db_petshop"
 
 # JWT
