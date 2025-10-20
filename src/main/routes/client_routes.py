@@ -22,9 +22,10 @@ from src.main.composers.client_composers.client_update_composer import client_up
 from src.main.composers.client_composers.client_delete_composer import client_delete_composer
 from src.main.composers.authenticate_user_composers.generate_token_composer import generate_token_composer
 from src.main.composers.client_composers.get_client_with_pets_and_schedules_composer import get_client_with_pets_and_schedules_composer
+from src.main.composers.client_composers.pay_schedule_composer import pay_schedule_composer
 
 #Import Middlewares
-from src.middlewares.ensureAuthenticated import ensure_admin
+from src.middlewares.ensureAuthenticated import ensure_admin, ensure_client
 
 db = DBConection()
 
@@ -137,6 +138,24 @@ async def login_client(request: Request, session: AsyncSession = Depends(db.get_
 async def get_client_with_pets_and_schedules(request: Request, session: AsyncSession = Depends(db.get_session), ensureAdmin = Depends(ensure_admin)):
 
     http_response: HttpResponse = await request_adapter(request, session, get_client_with_pets_and_schedules_composer)
+
+    return JSONResponse(content=http_response.body, status_code=http_response.status_code)
+
+@router.get("/pay_schedule", response_model=Dict, openapi_extra={
+    "security": [{"BearerAuth": []}],
+    "parameters": [
+        {
+            "name": "id_schedule",
+            "in": "query",
+            "required": True,
+            "schema": {"type": "string"},
+        }
+    ]
+    
+})
+async def pay_schedule(request: Request, session: AsyncSession = Depends(db.get_session), ensureClient = Depends(ensure_client)):
+
+    http_response: HttpResponse = await request_adapter(request, session, pay_schedule_composer)
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
