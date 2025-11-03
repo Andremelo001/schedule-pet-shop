@@ -52,6 +52,14 @@ Este projeto foi desenvolvido para modernizar e digitalizar o gerenciamento de p
 - ✅ Solicitação de cancelamento com token JWT
 - ✅ Exclusão de agendamentos (com validação de data)
 
+### 💳 Sistema de Pagamentos (Microserviço)
+- ✅ Geração de pagamentos via Pix para agendamentos
+- ✅ Integração com microserviço de pagamentos externo
+- ✅ Arquitetura de microserviços para processamento de pagamentos
+- ✅ Isolamento de responsabilidades com PaymentGatewayService
+- ✅ Comunicação assíncrona via HTTP
+- ✅ Tratamento de erros e timeouts
+
 ### 🛠️ Gestão de Serviços
 - ✅ Cadastro de novos tipos de serviços
 - ✅ Definição de duração e preços dos serviços
@@ -91,6 +99,7 @@ Este projeto foi desenvolvido para modernizar e digitalizar o gerenciamento de p
 ### Comunicação
 - **[SMTP](https://docs.python.org/3/library/smtplib.html)** - Envio de emails para notificações
 - **[SSL](https://docs.python.org/3/library/ssl.html)** - Conexões seguras para email
+- **[HTTPX](https://www.python-httpx.org/)** - Cliente HTTP assíncrono para comunicação entre microserviços
 
 ### Desenvolvimento & Testes
 - **[Pytest](https://pytest.org/)** - Framework de testes
@@ -105,13 +114,34 @@ Este projeto foi desenvolvido para modernizar e digitalizar o gerenciamento de p
 
 ## 🏗️ Arquitetura
 
-O projeto segue os princípios da **Clean Architecture**, garantindo:
+O projeto segue os princípios da **Clean Architecture** e **Arquitetura de Microserviços**, garantindo:
 
 - **Separação de responsabilidades**
 - **Baixo acoplamento**
 - **Alta coesão**
 - **Testabilidade**
 - **Manutenibilidade**
+- **Escalabilidade independente de serviços**
+
+### Microserviços
+
+Este sistema é composto por múltiplos microserviços que trabalham de forma integrada:
+
+#### 🏪 **PetShop Management API** (Este repositório)
+Serviço principal responsável por:
+- Gestão de clientes, pets e agendamentos
+- Catálogo de serviços
+- Autenticação e autorização
+- Coordenação de pagamentos
+
+#### 💰 **[Payments API](https://github.com/Andremelo001/payments_API)**
+Microserviço dedicado ao processamento de pagamentos:
+- Geração de pagamentos via Pix
+- Processamento de transações
+- Integração com gateways de pagamento
+- Gestão de status de pagamentos
+
+> **Arquitetura de Microserviços**: A comunicação entre os serviços é feita de forma assíncrona via HTTP, permitindo que cada serviço seja desenvolvido, testado e escalado de forma independente.
 
 ### Estrutura de Pastas
 
@@ -127,14 +157,16 @@ src/
 │   ├── authenticate_user/  # Autenticação de usuários
 │   ├── pet/               # Domínio de pets
 │   ├── schedule/          # Domínio de agendamentos
-│   └── user/              # Domínio de usuários
+│   └── user/              # Domínio de usuários (inclui pagamentos)
 ├── infra/                 # Camada de infraestrutura
 │   └── db/               # Configurações do banco
 │       ├── entities/     # Entidades do banco
 │       └── repositories/ # Repositórios
 ├── drivers/              # Drivers externos
 │   ├── jwt/             # Serviços JWT
-│   └── password_hasher/ # Hash de senhas
+│   ├── password_hasher/ # Hash de senhas
+│   ├── email_sender/    # Serviço de envio de emails
+│   └── payment_gateway/ # 🆕 Gateway de comunicação com microserviço de pagamentos
 ├── middlewares/          # Middlewares de autenticação
 ├── errors/              # Tratamento de erros
 └── tests/               # Testes automatizados
@@ -240,6 +272,7 @@ A documentação da API estará em: `http://localhost:8000/docs`
 - `DELETE /delete` - Excluir cliente (Admin)
 - `POST /login` - Login de cliente
 - `GET /get_client_with_pets_and_schedules` - Relatório completo (Admin)
+- `GET /pay` - Gerar pagamento Pix para agendamento (Cliente)
 
 ### 🐕 Pets (`/pets`)
 - `POST /create` - Cadastrar novo pet (Cliente)
