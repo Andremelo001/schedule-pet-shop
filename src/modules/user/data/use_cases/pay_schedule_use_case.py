@@ -1,22 +1,24 @@
 from src.modules.schedule.data.interfaces.interface_schedule_repository import InterfaceScheduleRepository
 from src.modules.user.domain.use_cases.interface_pay_schedule import InterfacePaySchedule
+from src.drivers.payment_gateway.interfaces.interface_payment_gateway import InterfacePaymentGateway
 
 from typing import Dict
-
-import httpx
-
 class PayScheduleUseCase(InterfacePaySchedule):
-    def __init__(self, repository: InterfaceScheduleRepository):
+    def __init__(
+        self, 
+        repository: InterfaceScheduleRepository,
+        payment_gateway: InterfacePaymentGateway
+    ):
         self.__repository = repository
+        self.__payment_gateway = payment_gateway
     
     async def pay_schedule(self, id_schedule: str) -> Dict:
 
         payments_info = await self.__payments_informations(id_schedule)
 
-        async with httpx.AsyncClient() as client:
-            payment = await client.post('http://microservice_payments:8000/payments/generate_payment', json=payments_info)
-
-        return payment.json()
+        payment = await self.__payment_gateway.generate_payment(payments_info)
+        
+        return payment
 
     async def __payments_informations(self, id_schedule: str) -> Dict:
 
