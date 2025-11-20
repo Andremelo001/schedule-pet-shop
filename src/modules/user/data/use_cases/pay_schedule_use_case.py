@@ -23,7 +23,7 @@ class PayScheduleUseCase(InterfacePaySchedule):
         
         return payment
 
-    async def __payment_exists(self, id_schedule: str, payment: Dict) -> None:
+    async def __payment_exists(self, id_schedule: str) -> None:
 
         payment = await self.__payment_gateway.get_payment(id_schedule)
 
