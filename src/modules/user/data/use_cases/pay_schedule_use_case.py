@@ -27,7 +27,7 @@ class PayScheduleUseCase(InterfacePaySchedule):
 
         payment = await self.__payment_gateway.get_payment(id_schedule)
 
-        if payment:
+        if payment and payment["data"] is not None:
             raise HttpConflitError("Pagamento já existe")
 
     async def __payments_informations(self, id_schedule: str) -> Dict:
