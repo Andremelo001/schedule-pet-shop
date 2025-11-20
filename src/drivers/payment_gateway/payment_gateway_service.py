@@ -8,7 +8,10 @@ load_dotenv()
 
 class PaymentGatewayService(InterfacePaymentGateway):
     def __init__(self):
-        self.__base_url = os.getenv("MICROSERVICE_URL")
+        self.__base_url = (
+            os.getenv("MICROSERVICE_URL_PRODUCTION") or 
+            os.getenv("MICROSERVICE_URL_DEVELOPMENT")
+        )
         self.__payment_endpoint = f"{self.__base_url}/payments/generate_payment"
         self.__get_payment_endpoint = f"{self.__base_url}/payments/finder_payment"
 
