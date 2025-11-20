@@ -1,6 +1,7 @@
 from src.modules.schedule.data.interfaces.interface_schedule_repository import InterfaceScheduleRepository
 from src.modules.user.domain.use_cases.interface_pay_schedule import InterfacePaySchedule
 from src.drivers.payment_gateway.interfaces.interface_payment_gateway import InterfacePaymentGateway
+from src.errors.types_errors import HttpConflitError
 
 from typing import Dict
 class PayScheduleUseCase(InterfacePaySchedule):
@@ -16,9 +17,18 @@ class PayScheduleUseCase(InterfacePaySchedule):
 
         payments_info = await self.__payments_informations(id_schedule)
 
+        await self.__payment_exists(id_schedule)
+
         payment = await self.__payment_gateway.generate_payment(payments_info)
         
         return payment
+
+    async def __payment_exists(self, id_schedule: str, payment: Dict) -> None:
+
+        payment = await self.__payment_gateway.get_payment(id_schedule)
+
+        if payment:
+            raise HttpConflitError("Pagamento já existe")
 
     async def __payments_informations(self, id_schedule: str) -> Dict:
 
@@ -31,5 +41,6 @@ class PayScheduleUseCase(InterfacePaySchedule):
         return {
             'amount': amount,
             'desc': "Pagamento via Pix",
-            'email': email
+            'email': email,
+            'schedule_id': id_schedule
         }

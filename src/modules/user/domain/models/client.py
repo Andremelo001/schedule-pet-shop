@@ -8,6 +8,3 @@ class Client():
         self.age = age
         self.email = email
         self.senha = senha
-    
-
-
