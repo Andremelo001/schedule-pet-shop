@@ -161,10 +161,8 @@ async def pay_schedule(request: Request, session: AsyncSession = Depends(db.get_
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 
 @router.post("/notification", response_model=Dict)
-async def receive_notification(request: Request, session: AsyncSession = Depends(db.get_session), ensureClient = Depends(ensure_client)):
+async def receive_notification(request: Request, session: AsyncSession = Depends(db.get_session)):
 
     http_response: HttpResponse = await request_adapter(request, session, process_payment_composer)
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
-
-
