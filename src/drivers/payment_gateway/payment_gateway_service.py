@@ -37,19 +37,13 @@ class PaymentGatewayService(InterfacePaymentGateway):
     async def get_payment(self, id_schedule: str) -> Dict:
 
         try:
+            await asyncio.sleep(10.0)
+
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.get(
                     self.__get_payment_endpoint,
                     params={"id_schedule": id_schedule}
                 )
-
-                if response.status_code == 429:
-                    await asyncio.sleep(2.0)
-                    
-                    response = await client.get(
-                        self.__get_payment_endpoint,
-                        params={"id_schedule": id_schedule}
-                    )
 
                 response.raise_for_status()
 
