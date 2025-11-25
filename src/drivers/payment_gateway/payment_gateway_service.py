@@ -3,6 +3,7 @@ from typing import Dict
 import httpx
 from dotenv import load_dotenv
 import os
+import asyncio
 
 load_dotenv()
 
@@ -18,7 +19,7 @@ class PaymentGatewayService(InterfacePaymentGateway):
     async def generate_payment(self, payment_info: Dict) -> Dict:
 
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.post(
                     self.__payment_endpoint,
                     json=payment_info,
@@ -31,18 +32,24 @@ class PaymentGatewayService(InterfacePaymentGateway):
             
         except httpx.HTTPError as e:
             raise Exception(f"Erro ao comunicar com o microserviço de pagamentos: {str(e)}")
-        
-        except Exception as e:
-            raise Exception(f"Erro inesperado ao processar pagamento: {str(e)}")
+
         
     async def get_payment(self, id_schedule: str) -> Dict:
 
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.get(
                     self.__get_payment_endpoint,
                     params={"id_schedule": id_schedule}
                 )
+
+                if response.status_code == 429:
+                    await asyncio.sleep(2.0)
+                    
+                    response = await client.get(
+                        self.__get_payment_endpoint,
+                        params={"id_schedule": id_schedule}
+                    )
 
                 response.raise_for_status()
 
