@@ -22,7 +22,7 @@ class FinderPaymentUseCase(InterfaceFinderPayment):
         if payment_data is None:
             raise HttpNotFoundError("Pagamento não foi encontrado no banco")
         
-        return payment
+        return payment_data
 
     async def __format_response(self, id_schedule: str) -> Dict:
 
