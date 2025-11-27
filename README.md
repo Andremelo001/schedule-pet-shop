@@ -20,6 +20,7 @@ Este projeto foi desenvolvido para modernizar e digitalizar o gerenciamento de p
 - **Gestão de Clientes**: Cadastro, atualização e controle de dados dos proprietários de pets
 - **Gerenciamento de Pets**: Registro detalhado dos animais com informações sobre raça, idade e características
 - **Sistema de Agendamentos**: Controle de consultas e serviços com data e horário
+- **Pagamento dos Agendamentos**: Cliente pode realizar o pagamento de seus respectivos agendamentos via pix
 - **Catálogo de Serviços**: Gestão de tipos de serviços oferecidos com preços e duração
 - **Autenticação Segura**: Sistema de login diferenciado para administradores e clientes
 - **Controle de Acesso**: Middleware de autenticação com JWT tokens
@@ -326,6 +327,8 @@ EMAIL_HOST="smtp.ethereal.email"
 EMAIL_PORT="587"
 EMAIL_USERNAME="seu_email"
 EMAIL_PASSWORD="senha_email"
+
+MICROSERVICE_URL="http://microservice_payments:8000"
 ```
 
 > **🔒 Segurança**: 
