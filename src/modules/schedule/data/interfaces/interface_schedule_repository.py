@@ -41,3 +41,6 @@ class InterfaceScheduleRepository(ABC):
 
     @abstractmethod
     async def list_id_pets_by_client(self, id_client: str) -> List[str]: pass
+
+    @abstractmethod
+    async def update_status_schedule(self, id_schedule: str) -> None: pass

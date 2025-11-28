@@ -34,7 +34,7 @@ class ScheduleRepository(InterfaceScheduleRepository):
                 date_schedule= schedule.date_schedule,
                 time_schedule= schedule.time_schedule,
                 total_price_schedule= price_total,
-                schedule_active= True,
+                schedule_active= False,
                 client_id= schedule.id_client,
                 pet_id= schedule.id_pet
             )
@@ -131,3 +131,11 @@ class ScheduleRepository(InterfaceScheduleRepository):
         pets = (await self.__session.execute(select(Pet).where(Pet.client_id == id_client))).scalars().all()
 
         return [str(pet.id) for pet in pets]
+    
+    async def update_status_schedule(self, id_schedule: str) -> None:
+
+        schedule = (await self.__session.execute(select(ScheduleEntitie).where(ScheduleEntitie.id == id_schedule))).scalar_one_or_none()
+
+        schedule.schedule_active = True
+
+        await self.__session.commit()
