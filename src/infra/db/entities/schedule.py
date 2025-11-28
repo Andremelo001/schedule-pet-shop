@@ -20,7 +20,7 @@ class ScheduleBase(SQLModel):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     date_schedule: date
     time_schedule: time
-    total_price_schedule: int
+    total_price_schedule: float
     schedule_active: bool
 
 

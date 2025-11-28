@@ -19,7 +19,7 @@ class ScheduleRepository(InterfaceScheduleRepository):
 
     async def create_schedule(self, schedule: ScheduleDTO) -> None:
 
-        price_total = 0
+        price_total = 0.0
 
         for id_service in schedule.list_services:
 
