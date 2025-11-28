@@ -25,7 +25,17 @@ class PayScheduleUseCase(InterfacePaySchedule):
 
     async def __payment_exists(self, id_schedule: str) -> None:
 
-        payment = await self.__payment_gateway.get_payment(id_schedule)
+        schedule = await self.__repository.find_schedule_by_id(id_schedule)
+
+        if schedule.schedule_active:
+            raise HttpConflitError("Agendamento já está pago")
+
+        try: 
+            payment = await self.__payment_gateway.get_payment(id_schedule)
+            
+        except Exception as e:
+            print(f"Falha ao verificar pagamento existente no microserviço: {e}")
+            return
 
         if payment and payment["data"] is not None:
             raise HttpConflitError("Pagamento já existe")

@@ -3,7 +3,6 @@ from typing import Dict
 import httpx
 from dotenv import load_dotenv
 import os
-import asyncio
 
 load_dotenv()
 
@@ -37,8 +36,6 @@ class PaymentGatewayService(InterfacePaymentGateway):
     async def get_payment(self, id_schedule: str) -> Dict:
 
         try:
-            await asyncio.sleep(10.0)
-
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.get(
                     self.__get_payment_endpoint,
