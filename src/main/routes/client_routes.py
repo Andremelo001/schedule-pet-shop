@@ -23,7 +23,6 @@ from src.main.composers.client_composers.client_delete_composer import client_de
 from src.main.composers.authenticate_user_composers.generate_token_composer import generate_token_composer
 from src.main.composers.client_composers.get_client_with_pets_and_schedules_composer import get_client_with_pets_and_schedules_composer
 from src.main.composers.client_composers.pay_schedule_composer import pay_schedule_composer
-from src.main.composers.client_composers.process_payment_composer import process_payment_composer
 from src.main.composers.client_composers.finder_payment_composer import finder_payment_composer
 
 #Import Middlewares
@@ -158,13 +157,6 @@ async def get_client_with_pets_and_schedules(request: Request, session: AsyncSes
 async def pay_schedule(request: Request, session: AsyncSession = Depends(db.get_session), ensureClient = Depends(ensure_client)):
 
     http_response: HttpResponse = await request_adapter(request, session, pay_schedule_composer)
-
-    return JSONResponse(content=http_response.body, status_code=http_response.status_code)
-
-@router.post("/notification", response_model=Dict)
-async def receive_notification(request: Request, session: AsyncSession = Depends(db.get_session)):
-
-    http_response: HttpResponse = await request_adapter(request, session, process_payment_composer)
 
     return JSONResponse(content=http_response.body, status_code=http_response.status_code)
 

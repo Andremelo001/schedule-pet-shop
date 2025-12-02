@@ -7,5 +7,3 @@ class ControllerInterface(ABC):
 
     @abstractmethod
     async def handle(self, http_request: HttpRequest) -> HttpResponse: pass
-
-

@@ -11,7 +11,7 @@ class DBConection:
         # Carregar variáveis do .env
         load_dotenv()
 
-        self.__database_url = os.getenv("DATABASE_URL")
+        self.__database_url = (os.getenv("DATABASE_URL_NEON") or os.getenv("DATABASE_URL"))
 
         self.__engine = self.__create_engine()
 
