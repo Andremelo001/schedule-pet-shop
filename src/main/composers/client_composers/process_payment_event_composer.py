@@ -7,11 +7,13 @@ from src.infra.db.settings.connection import DBConection
 db = DBConection()
 
 async def process_payment_event_composer(message_body: dict):
-    async with db.get_session() as session:
-        repository = ScheduleRepository(session)
+    
+    session = db.create_session()
 
-        use_case = ProcessPaymentUseCase(repository)
+    repository = ScheduleRepository(session)
 
-        controller = ProcessPaymentEventController(use_case)
+    use_case = ProcessPaymentUseCase(repository)
 
-        return await controller.handle(message_body)
+    controller = ProcessPaymentEventController(use_case)
+
+    return await controller.handle(message_body)
