@@ -26,10 +26,24 @@ class DBConection:
     # Criar fábrica de sessões assíncronas
     def __create_session(self):
         return sessionmaker(self.__engine, class_=AsyncSession, expire_on_commit=False)
-
-    # Dependência para obter uma sessão assíncrona
-    @asynccontextmanager
+    
+    # Dependência para obter uma sessão assíncrona (para uso com FastAPI Depends)
     async def get_session(self) -> AsyncGenerator[AsyncSession, None]:
+        session = self.__async_session_maker()
+        try:
+            yield session
+            
+        except Exception:
+            if session.in_transaction():
+                await session.rollback()
+            raise
+
+        finally:
+            await session.close()
+    
+    # Context manager para uso com async with
+    @asynccontextmanager
+    async def session(self) -> AsyncGenerator[AsyncSession, None]:
         session = self.__async_session_maker()
         try:
             yield session
