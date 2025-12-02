@@ -3,6 +3,7 @@ from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 import os 
 from typing import AsyncGenerator
+from contextlib import asynccontextmanager
 
 class DBConection:
 
@@ -27,13 +28,20 @@ class DBConection:
         return sessionmaker(self.__engine, class_=AsyncSession, expire_on_commit=False)
 
     # Dependência para obter uma sessão assíncrona
+    @asynccontextmanager
     async def get_session(self) -> AsyncGenerator[AsyncSession, None]:
-        async with self.__async_session_maker() as session:
+        session = self.__async_session_maker()
+        try:
             yield session
+            
+        except Exception:
+            if session.in_transaction():
+                await session.rollback()
+            raise
+
+        finally:
+            await session.close()
     
     @property
     def engine(self):
         return self.__engine
-    
-    def create_session(self) -> AsyncSession:
-        return self.__async_session_maker()

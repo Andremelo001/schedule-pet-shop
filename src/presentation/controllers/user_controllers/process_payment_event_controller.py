@@ -11,9 +11,30 @@ class ProcessPaymentEventController(MessageControllerInterface):
         status = message_body.get("status")
         schedule_id = message_body.get("schedule_id")
 
-        response = await self.__use_case.process_notification(schedule_id, status)
+        if not status or not schedule_id:
+            return HttpResponse(
+                status_code=400,
+                body={
+                    "confirmation": False,
+                    "message": "Invalid message: missing status or schedule_id",
+                    "received": message_body
+                }
+            )
 
-        return HttpResponse(
-            status_code=200,
-            body=response
-        )
+        try:
+            response = await self.__use_case.process_notification(schedule_id, status)
+
+            return HttpResponse(
+                status_code=200, 
+                body=response
+            )
+        
+        except Exception as e:
+            return HttpResponse(
+                status_code=500,
+                body={
+                    "confirmation": False,
+                    "message": f"Error processing payment: {str(e)}",
+                    "schedule_id": schedule_id
+                }
+            )
